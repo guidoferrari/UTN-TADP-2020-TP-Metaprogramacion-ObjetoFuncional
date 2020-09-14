@@ -3,7 +3,7 @@ describe Operaciones do
 
   describe 'Debe romper si el divisor es 0' do
     it 'debería pasar este test' do
-      expect(operaciones.dividir(10,0)).to raise_error(RuntimeError)
+      expect{operaciones.dividir(10,0)}.to raise_error(RuntimeError)
     end
   end
 

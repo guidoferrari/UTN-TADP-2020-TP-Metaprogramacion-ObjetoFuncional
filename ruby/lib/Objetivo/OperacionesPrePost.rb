@@ -1,7 +1,7 @@
-class Operaciones
+class Operaciones < PrePost
 
   #precondición de dividir
-  #pre{ divisor != 0 }
+  pre{ divisor != 0 }
   #postcondición de dividir
   #post{ |result| result * divisor == dividendo }
   def dividir(dividendo, divisor)

@@ -1,4 +1,4 @@
 require 'rspec'
 
-require_relative '../lib/Objetivo/OperacionesPrePost'
-require_relative '../lib/Class'
+require_relative '../lib/Objetivo/Operaciones'
+require_relative '../lib/PrePost'

@@ -1,4 +1,8 @@
-class Operaciones < PrePost
+class Operaciones
+
+  # def self.pre
+  #   puts "asd"
+  # end
 
   #precondición de dividir
   pre{ divisor != 0 }
@@ -12,6 +16,8 @@ class Operaciones < PrePost
   def restar(minuendo, sustraendo)
     minuendo - sustraendo
   end
+
+
 
 end
 

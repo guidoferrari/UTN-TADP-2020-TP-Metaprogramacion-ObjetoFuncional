@@ -1,11 +1,12 @@
-class Class
-  @pre
-  @post
+class BasicObject
+  @prec
+  @postc
 
   def anotacion_de_metodo(anotacion, valor)
     @annotation_list[anotacion] = valor
   end
 
+=begin
   def self.define_method(nombreMetodo)
     super
 
@@ -20,13 +21,16 @@ class Class
       end
     end
   end
+=end
 
   def post
-    @post = block
+    @postc = block
   end
 
-  def pre
-    @pre = block
+  def self.pre
+    #@prec = block
+    #puts block
+    puts 'asd'
   end
 
 end

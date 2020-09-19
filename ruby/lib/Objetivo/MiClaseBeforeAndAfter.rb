@@ -1,12 +1,12 @@
 class MiClase
-
+  attr_reader :before, :after
 
   #method_added
 
   #before_and_after_each_call(# Bloque Before. Se ejecuta antes de cada mensaje
-  #    proc{ puts “Entré a un mensaje” },
+  #    proc{ @before = 1 },
       # Bloque After. Se ejecuta después de cada mensaje
-  #    proc{ puts “Salí de un mensaje” }
+  #    proc{ @after = “Salí de un mensaje” }
   #)
 
   def mensaje_1

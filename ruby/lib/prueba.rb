@@ -4,3 +4,4 @@ class Prueba
     :tadp
   end
 end
+puts "buenas"

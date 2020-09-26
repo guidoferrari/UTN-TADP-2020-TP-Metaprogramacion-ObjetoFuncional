@@ -1,7 +1,7 @@
 describe Prueba do
   let(:prueba) { Prueba.new }
 
-  describe '#materia' do
+  describe '#fixture' do
     it 'debería ejecutar el proc antes, el método, y por último el proc después' do
       $stdout = StringIO.new
 

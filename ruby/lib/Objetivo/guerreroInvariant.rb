@@ -1,4 +1,7 @@
+require_relative '../contratos'
+
 class Guerrero
+  include Contratos
 
   attr_accessor :vida, :fuerza
 

@@ -24,13 +24,15 @@ module Contratos
       __no_recursivo__ do
         puts "Added #{method_name} method."
         metodo_viejo = self.instance_method(method_name)
-        ejecutarAntes = @__antes_despues__.antes
-        ejecutarDespues = @__antes_despues__.despues
+        if(@__antes_despues__)
+          ejecutarAntes = @__antes_despues__.antes
+          ejecutarDespues = @__antes_despues__.despues
+        end
         # klass = self
         self.define_method(method_name) do |*args, &block|
-          ejecutarAntes.call()
+          ejecutarAntes.call() if ejecutarAntes
           metodo_viejo.bind(self).call(*args)
-          ejecutarDespues.call()
+          ejecutarDespues.call() if ejecutarDespues
         end
       end
     end

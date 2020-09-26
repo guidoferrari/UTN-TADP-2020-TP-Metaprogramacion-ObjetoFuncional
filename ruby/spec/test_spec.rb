@@ -5,7 +5,7 @@ describe Prueba do
     it 'debería ejecutar el proc antes, el método, y por último el proc después' do
       $stdout = StringIO.new
 
-      prueba.materia
+      prueba.metodoAEjecutar
 
       salida = $stdout.string.split("\n")
       expect(salida[0]).to eq('Ejecuté esto antes')

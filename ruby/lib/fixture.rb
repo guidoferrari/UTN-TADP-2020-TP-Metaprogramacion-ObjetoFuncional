@@ -10,7 +10,7 @@ class Prueba
       proc{ puts "Ejecuté esto después" }
   )
 
-  def materia
+  def metodoAEjecutar
     puts "ejecutando"
   end
 end

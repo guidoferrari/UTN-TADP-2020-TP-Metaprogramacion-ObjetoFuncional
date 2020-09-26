@@ -11,7 +11,6 @@ class Prueba
   )
 
   def materia
-    puts "método materia"
-    "prueba"
+    puts "ejecutando"
   end
 end

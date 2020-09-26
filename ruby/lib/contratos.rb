@@ -29,13 +29,8 @@ module Contratos
         # klass = self
         self.define_method(method_name) do |*args, &block|
           ejecutarAntes.call()
-          resultado = "esta es una "
-          puts "Ejecutar método"
-          resultado << metodo_viejo.bind(self).call(*args)
-          resultado << " de redefinición de métodos"
+          metodo_viejo.bind(self).call(*args)
           ejecutarDespues.call()
-
-          return resultado
         end
       end
     end

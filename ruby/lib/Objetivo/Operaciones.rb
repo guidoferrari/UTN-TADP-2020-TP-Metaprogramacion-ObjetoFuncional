@@ -1,8 +1,8 @@
+require_relative('../PrePost.rb')
+
 class Operaciones
 
-  # def self.pre
-  #   puts "asd"
-  # end
+  ################################################################
 
   #precondición de dividir
   pre{ divisor != 0 }
@@ -16,11 +16,7 @@ class Operaciones
   def restar(minuendo, sustraendo)
     minuendo - sustraendo
   end
-
-
-
 end
-
 
 #> Operaciones.new.dividir(4, 0)
 # RuntimeError: Failed to meet preconditions

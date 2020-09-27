@@ -1,36 +1,26 @@
-class BasicObject
-  @prec
-  @postc
+class Module
+  attr_accessor :prec, :postc
 
-  def anotacion_de_metodo(anotacion, valor)
-    @annotation_list[anotacion] = valor
-  end
+  alias_method :__define_method, :define_method
 
-=begin
-  def self.define_method(nombreMetodo)
-    super
+  def self.define_method(selector, *args, &block)
 
-    if @pre != nil && @post == nil
-      metodo = instance_method(nombreMetodo)
+    __define_method(selector, *args, &block) unless (!prec.nil? || !post.nil?)
 
-      define_method(nombreMetodo) do |*args, &block|
-        unless @pre
-          raise RuntimeError
-        end
-        metodo.bind(self).(*args, &block)
-      end
+    metodo = instance_method(selector)
+
+    __define_method(selector) do |*args, &block|
+      raise RuntimeError('Failed to meet preconditions') unless @pre || @pre.nil?
+      metodo.bind(self).(*args, &block)
+      raise RuntimeError('Failed to meet postconditions') unless @post || @post.nil?
     end
   end
-=end
 
-  def post
+  def post(&block)
     @postc = block
   end
 
-  def self.pre
-    #@prec = block
-    #puts block
-    puts 'asd'
+  def pre(&block)
+    @prec = block
   end
-
 end

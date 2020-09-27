@@ -38,9 +38,10 @@ module Contratos
           #puts method_name
           #puts args
           ejecutarAntes.call() if ejecutarAntes
-          metodo_viejo.bind(self).call(*args)
+          resultado = metodo_viejo.bind(self).call(*args)
           ejecutarDespues.call() if ejecutarDespues
           # TODO Recorrer y validar @__invariantes__
+          resultado
         end
       end
     end

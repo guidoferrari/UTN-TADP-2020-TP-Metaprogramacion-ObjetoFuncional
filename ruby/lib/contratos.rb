@@ -1,4 +1,5 @@
 module Contratos
+
   def self.included(klass)
     inicializar_controlados(klass)
     if klass == Class
@@ -16,13 +17,14 @@ module Contratos
 
   module ClassMethods
 
+    attr_accessor :__invariantes__
+
     def before_and_after_each_call(procAntes, procDespues)
       @__antes_despues__ = AntesDespues.new(procAntes, procDespues)
     end
 
     def invariant(&block)
-      puts 'asd'
-      @__invariantes__.push(Invariante.new {block})
+      @__invariantes__ << Invariante.new(&block)
     end
 
     def pre (&block)
@@ -38,14 +40,12 @@ module Contratos
 
     def method_added(method_name)
       __no_recursivo__ do
-        #puts "Added #{method_name} method."
+        puts "Added #{method_name} method."
         metodo_viejo = self.instance_method(method_name)
         if(@__antes_despues__)
           ejecutarAntes = @__antes_despues__.antes
           ejecutarDespues = @__antes_despues__.despues
         end
-
-        listaDeInvariantes = @__invariantes__
 
         # if @__pre != nil
         #   precondition = @__pre
@@ -58,14 +58,18 @@ module Contratos
         # end
 
         klass = self
-        puts klass.inspect
+        #puts klass.inspect
+
+        puts 'invariantes = ' + @__invariantes__.inspect
 
         self.define_method(method_name) do |*args, &block|
           #puts "define_method"
           #puts method_name
           #puts args
-          #puts self.inspect
-          puts self.inspect
+          puts 'self dentro de define = ' + self.inspect
+          puts 'invariantes dentro de define = ' + self.class.__invariantes__.inspect
+
+          puts 'self = ' + self.inspect
 
           #
           # if precondition != nil
@@ -102,7 +106,8 @@ module Contratos
           resultado = metodo_viejo.bind(self).call(*args, &block)
           ejecutarDespues.call() if ejecutarDespues
 
-          #listaDeInvariantes.each{|invariante| self.instance_exec(*args, invariante)}
+          self_guardado = self
+          self.class.__invariantes__.each{|invariante| self_guardado.instance_exec(*args) {|args| invariante.validar.call}}
 
           resultado
         end
@@ -135,7 +140,11 @@ module Contratos
     end
 
     def validar
-      raise "Invariante incumplido" if !proc(&@bloque).call
+      #raise "Invariante incumplido" if !proc(&@bloque).call
+      Proc.new do
+        puts 'ASD'
+        raise "Invariante incumplido" if !@bloque.call
+      end
     end
   end
 
@@ -147,7 +156,7 @@ module Contratos
   #   end
   #
   #   def validar
-  #     proc {raise RuntimeError if !bloque.call == false}
+  #     proc {raise 'Failed to meet precondition' if !bloque.call == false}
   #   end
   # end
 end

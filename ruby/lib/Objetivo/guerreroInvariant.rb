@@ -10,7 +10,7 @@ class Guerrero
   #end
 
   invariant { vida >= 0 }
-  invariant { fuerza > 0 && fuerza < 100 }
+  #invariant { fuerza > 0 && fuerza < 100 }
 
   def initialize(vida, fuerza)
     @fuerza = fuerza

@@ -142,8 +142,7 @@ module Contratos
       #raise "Invariante incumplido" if !proc(&@bloque).call
       Proc.new do
         puts 'estamos dentro del invariante ' + self.inspect
-        puts @bloque.inspect
-        raise "Invariante incumplido" if !(@bloque.call)
+        raise "Invariante incumplido" if !(@bloque)
       end
     end
   end

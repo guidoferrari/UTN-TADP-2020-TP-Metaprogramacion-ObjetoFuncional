@@ -6,7 +6,7 @@ describe Guerrero do
 
       atacante = Guerrero.new(50, 80)
       atacante.atacar(guerrero)
-      expect(atacante.atacar(guerrero)).to raise_error(RuntimeError)
+      expect {atacante.atacar(guerrero)}.to raise_error(RuntimeError, 'Invariante incumplido')
     end
   end
 end

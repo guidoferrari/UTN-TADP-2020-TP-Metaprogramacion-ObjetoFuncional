@@ -1,9 +1,12 @@
+require_relative '../contratos'
+
 class Operaciones
+  include Contratos
 
   #precondición de dividir
-  #pre{ divisor != 0 }
+  pre{ divisor == 0 }
   #postcondición de dividir
-  #post{ |result| result * divisor == dividendo }
+  post{ |result| result * divisor == dividendo }
   def dividir(dividendo, divisor)
     dividendo / divisor
   end
@@ -14,7 +17,6 @@ class Operaciones
   end
 
 end
-
 
 #> Operaciones.new.dividir(4, 0)
 # RuntimeError: Failed to meet preconditions

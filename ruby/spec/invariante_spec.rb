@@ -1,13 +1,12 @@
 describe Guerrero do
-  let(:guerrero) { Guerrero.new }
+  let(:guerrero) { Guerrero.new(70, 50) }
 
   describe '#invariante' do
     it 'debería validar los invariantes' do
-      guerrero.vida = 200
 
-      atacante = Guerrero.new
-      atacante.fuerza = 20
+      atacante = Guerrero.new(50, 80)
       atacante.atacar(guerrero)
+      expect(atacante.atacar(guerrero)).to raise_error(RuntimeError)
     end
   end
 end

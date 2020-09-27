@@ -107,7 +107,7 @@ module Contratos
           ejecutarDespues.call() if ejecutarDespues
 
           self_guardado = self
-          self.class.__invariantes__.each{|invariante| self_guardado.instance_exec(*args) {|args| invariante.validar.call}}
+          self.class.__invariantes__.each{|invariante| self_guardado.instance_exec(*args, &invariante.validar)}
 
           resultado
         end
@@ -133,7 +133,6 @@ module Contratos
   end
 
   class Invariante
-    attr_accessor :bloque
 
     def initialize(&bloque)
       @bloque = bloque
@@ -142,8 +141,9 @@ module Contratos
     def validar
       #raise "Invariante incumplido" if !proc(&@bloque).call
       Proc.new do
-        puts 'ASD'
-        raise "Invariante incumplido" if !@bloque.call
+        puts 'estamos dentro del invariante ' + self.inspect
+        puts @bloque.inspect
+        raise "Invariante incumplido" if !(@bloque.call)
       end
     end
   end

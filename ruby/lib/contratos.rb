@@ -20,9 +20,12 @@ module Contratos
       @__antes_despues__ = AntesDespues.new(procAntes, procDespues)
     end
 
-    #def invariant
-    #  @__invariantes__ << Invariante.new {yield}
-    #end
+    def invariant(&bloque)
+      #@__invariantes__ << Invariante.new {yield}
+      #@__invariantes__ << Invariante.new(&bloque)
+      @__invariantes__ << AntesDespues.new(proc(&bloque), proc(&bloque))
+    end
+
 
     def method_added(method_name)
       __no_recursivo__ do
@@ -33,14 +36,22 @@ module Contratos
           ejecutarDespues = @__antes_despues__.despues
         end
         # klass = self
+        invariantes = @__invariantes__
         self.define_method(method_name) do |*args, &block|
           #puts "define_method"
           #puts method_name
           #puts args
+
+          invariantes.each { |invariante| invariante.antes.call }
+
           ejecutarAntes.call() if ejecutarAntes
           resultado = metodo_viejo.bind(self).call(*args)
           ejecutarDespues.call() if ejecutarDespues
+
           # TODO Recorrer y validar @__invariantes__
+          #target = self
+          #self.class.__invariantes__.each{|invariante| target.instance_exec(*args, &invariante.validar)}
+          #invariantes.each{|invariante| invariante.validar(target)}
           resultado
         end
       end
@@ -64,6 +75,7 @@ module Contratos
     end
   end
 
+=begin
   class Invariante
     attr_accessor :bloque
 
@@ -71,9 +83,18 @@ module Contratos
       @bloque = bloque
     end
 
-    def validar
-      raise "Invariante incumplido" if !proc(&@bloque).call
+    def validar(target)
+      puts "validar"
+      puts @bloque
+      #proc(&@bloque).call
+      target.instance_eval(&@bloque)
+
+      #raise "Invariante incumplido" if !proc(&@bloque).call
+      #raise "Invariante incumplido" if !target.instance_eval(&@bloque)
+      #raise "Invariante incumplido" if !target.instance_exec(*args, &@bloque)
+
     end
   end
+=end
 end
 

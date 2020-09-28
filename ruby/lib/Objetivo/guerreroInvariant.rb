@@ -9,6 +9,7 @@ class Guerrero
     #raise "Invariante incumplido" if !yield
   #end
 
+  invariant { puts vida }
   #invariant { vida >= 0 }
   #invariant { fuerza > 0 && fuerza < 100 }
 

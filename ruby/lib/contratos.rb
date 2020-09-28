@@ -60,16 +60,16 @@ module Contratos
         klass = self
         #puts klass.inspect
 
-        puts 'invariantes = ' + @__invariantes__.inspect
+        #puts 'invariantes = ' + @__invariantes__.inspect
 
         self.define_method(method_name) do |*args, &block|
           #puts "define_method"
           #puts method_name
           #puts args
-          puts 'self dentro de define = ' + self.inspect
-          puts 'invariantes dentro de define = ' + self.class.__invariantes__.inspect
+          #puts 'self dentro de define = ' + self.inspect
+          #puts 'invariantes dentro de define = ' + self.class.__invariantes__.inspect
 
-          puts 'self = ' + self.inspect
+          #puts 'self = ' + self.inspect
 
           #
           # if precondition != nil
@@ -107,7 +107,8 @@ module Contratos
           ejecutarDespues.call() if ejecutarDespues
 
           self_guardado = self
-          self.class.__invariantes__.each{|invariante| self_guardado.instance_exec(*args, &invariante.validar)}
+          self.class.__invariantes__.each{|invariante| self_guardado.instance_eval &invariante.validar()}
+          #self.class.__invariantes__.each{|invariante| invariante.validar(self_guardado).call}
 
           resultado
         end
@@ -138,11 +139,18 @@ module Contratos
       @bloque = bloque
     end
 
-    def validar
+    def validar()
+    #def validar(contexto)
       #raise "Invariante incumplido" if !proc(&@bloque).call
+      bloque =  @bloque
+      puts 'BLOQUE: ' + @bloque.inspect
       Proc.new do
-        puts 'estamos dentro del invariante ' + self.inspect
-        raise "Invariante incumplido" if !(@bloque)
+        #puts 'El contexto es ' + contexto.inspect
+        if ((bloque) == false)
+        #if ((contexto.instance_eval &bloque) == false)
+          puts 'es falso rey, debe romper'
+          raise "Invariante incumplido"
+        end
       end
     end
   end

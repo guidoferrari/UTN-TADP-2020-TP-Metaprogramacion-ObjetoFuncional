@@ -18,11 +18,12 @@ class Guerrero
   end
 
   def atacar(otro)
-    puts "Fuerza:"
-    puts @fuerza
-    puts "Vida defensor:"
+    #puts "Fuerza:"
+    #puts @fuerza
+    #puts "Vida defensor:"
+    #puts otro.vida
+    otro.vida -= @fuerza
     puts otro.vida
-    otro.vida = otro.vida - @fuerza
   end
 
 end

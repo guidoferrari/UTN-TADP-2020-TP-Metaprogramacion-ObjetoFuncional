@@ -25,10 +25,9 @@ def mi_clase.singleton_class
 end
 
 
-module before_and-after
+module BeforeAndAfter
   def before
     puts "esto se ejecuta antes"
-    super
   end
   def after
     puts "Esto se ejecuta despues"

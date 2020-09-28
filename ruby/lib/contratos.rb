@@ -14,6 +14,8 @@ module Contratos
     end
   end
 
+
+
   module ClassMethods
 
     def before_and_after_each_call(procAntes, procDespues)

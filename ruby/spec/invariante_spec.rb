@@ -31,7 +31,5 @@ describe Guerrero do
 
       expect { guerrero.atacar(otroGuerrero) }.to raise_error 'Fallo el invariante (vida >= 0)'
     end
-
-  # Qué pasa con invariantes sobre objetos afectados? Ej. la validación sobre vida del que recibe daño
   end
 end

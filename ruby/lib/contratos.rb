@@ -50,9 +50,9 @@ module Contratos
         puts "Redefiniendo el metodo #{method_name}."
 
         self.define_method(method_name) do |*args, &block|
-          ejecutarAntes.call() if ejecutarAntes
+          self.instance_exec &ejecutarAntes if ejecutarAntes
           resultado = metodo_viejo.bind(self).call(*args)
-          ejecutarDespues.call() if ejecutarDespues
+          self.instance_exec &ejecutarDespues if ejecutarDespues
 
           unless accesors.include? method_name.to_sym
             EjecutadorDeInvariante.ejecutar_invariantes(self, invariantes)

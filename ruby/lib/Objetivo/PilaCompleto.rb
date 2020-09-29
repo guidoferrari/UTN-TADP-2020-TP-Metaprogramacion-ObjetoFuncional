@@ -1,9 +1,9 @@
 class Pila
   attr_accessor :current_node, :capacity
 
-  #invariant { capacity >= 0 }
+  invariant { capacity >= 0 }
 
-  #post { empty? }
+  post { empty? }
   def initialize(capacity)
     @capacity = capacity
     @current_node = nil

@@ -5,19 +5,15 @@ class Guerrero
 
   attr_accessor :vida, :fuerza
 
-  #def self.invariant
-    #raise "Invariante incumplido" if !yield
-  #end
+  def initialize(vida=0, fuerza=0)
+    self.vida = vida
+    self.fuerza = fuerza
+  end
 
-  invariant { puts vida }
-  #invariant { vida >= 0 }
-  #invariant { fuerza > 0 && fuerza < 100 }
+  invariant { vida >= 0 }
+  invariant { fuerza > 0 && fuerza < 100 }
 
   def atacar(otro)
-    puts "Fuerza:"
-    puts fuerza
-    puts "Vida defensor:"
-    puts otro.vida
     otro.vida -= fuerza
   end
 

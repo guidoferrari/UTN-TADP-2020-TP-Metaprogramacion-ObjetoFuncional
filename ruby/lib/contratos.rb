@@ -11,6 +11,7 @@ module Contratos
   def self.inicializar_controlados(klass)
     klass.instance_eval do
       @__invariantes__ = []
+      @__accessors__ = []
     end
   end
 
@@ -22,47 +23,71 @@ module Contratos
 
     def invariant(&bloque)
       #@__invariantes__ << Invariante.new {yield}
-      #@__invariantes__ << Invariante.new(&bloque)
-      @__invariantes__ << AntesDespues.new(proc(&bloque), proc(&bloque))
+      @__invariantes__ << Invariante.new(bloque)
+      #@__invariantes__ << AntesDespues.new(proc(&bloque), proc(&bloque))
     end
 
+    def attr_accessor(*args)
+      @__accessors__ += args
+      super
+    end
 
     def method_added(method_name)
       __no_recursivo__ do
-        puts "Added #{method_name} method."
+        puts "Se agrego el metodo #{method_name}."
         metodo_viejo = self.instance_method(method_name)
-        if(@__antes_despues__)
+        if @__antes_despues__
           ejecutarAntes = @__antes_despues__.antes
           ejecutarDespues = @__antes_despues__.despues
         end
         # klass = self
         invariantes = @__invariantes__
-        self.define_method(method_name) do |*args, &block|
-          #puts "define_method"
-          #puts method_name
-          #puts args
 
-          invariantes.each { |invariante| invariante.antes.call }
+        unless @__accessors__.include? method_name.to_sym
+          puts "Redefiniendo el metodo #{method_name}."
 
-          ejecutarAntes.call() if ejecutarAntes
-          resultado = metodo_viejo.bind(self).call(*args)
-          ejecutarDespues.call() if ejecutarDespues
+          self.define_method(method_name) do |*args, &block|
+            #puts "define_method"
+            #puts method_name
+            #puts args
 
-          # TODO Recorrer y validar @__invariantes__
-          #target = self
-          #self.class.__invariantes__.each{|invariante| target.instance_exec(*args, &invariante.validar)}
-          #invariantes.each{|invariante| invariante.validar(target)}
-          resultado
+            ejecutarAntes.call() if ejecutarAntes
+            resultado = metodo_viejo.bind(self).call(*args)
+            ejecutarDespues.call() if ejecutarDespues
+
+            contexto = self
+
+            resultados_invariantes =  invariantes.map do |invariante|
+              begin
+                contexto.instance_exec &invariante.bloque
+              rescue NoMethodError => e
+                true
+              end
+            end
+
+            puts "Resultados Invariantes : #{resultados_invariantes}"
+
+            raise 'Fallo' unless resultados_invariantes.all?
+            # TODO Recorrer y validar @__invariantes__
+            #target = self
+            #self.class.__invariantes__.each{|invariante| target.instance_exec(*args, &invariante.validar)}
+            #invariantes.each{|invariante| invariante.validar(target)}
+            resultado
+          end
         end
       end
     end
 
     def __no_recursivo__
-      return if Thread.current[:__ejecutando__]
+      begin
+        return if Thread.current[:__ejecutando__]
 
-      Thread.current[:__ejecutando__] = true
-      yield if block_given?
-      Thread.current[:__ejecutando__] = false
+        Thread.current[:__ejecutando__] = true
+        yield if block_given?
+
+      ensure
+        Thread.current[:__ejecutando__] = false
+      end
     end
   end
 
@@ -75,11 +100,10 @@ module Contratos
     end
   end
 
-=begin
   class Invariante
     attr_accessor :bloque
 
-    def initialize(&bloque)
+    def initialize(bloque)
       @bloque = bloque
     end
 
@@ -95,6 +119,5 @@ module Contratos
 
     end
   end
-=end
 end
 

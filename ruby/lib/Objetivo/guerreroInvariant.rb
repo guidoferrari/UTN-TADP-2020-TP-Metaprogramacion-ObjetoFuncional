@@ -1,4 +1,4 @@
-require_relative '../contratos'
+require_relative '../Contratos'
 
 class Guerrero
   include Contratos

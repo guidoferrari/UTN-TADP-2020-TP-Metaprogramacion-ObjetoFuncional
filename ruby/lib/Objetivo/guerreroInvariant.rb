@@ -5,11 +5,6 @@ class Guerrero
 
   attr_accessor :vida, :fuerza
 
-  def initialize(vida=0, fuerza=0)
-    self.vida = vida
-    self.fuerza = fuerza
-  end
-
   invariant { vida >= 0 }
   invariant { fuerza > 0 && fuerza < 100 }
 

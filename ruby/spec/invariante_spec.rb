@@ -2,7 +2,7 @@ describe Guerrero do
   let(:guerrero) { Guerrero.new }
 
   describe '#invariante' do
-    it 'debería funcionar por cumplir los invariantes' do
+    it 'Ataco a un guerrero correctamente sin romper reglas de invariantes' do
       guerrero.vida = 100
       guerrero.fuerza = 10
 
@@ -12,21 +12,13 @@ describe Guerrero do
       atacante.atacar(guerrero)
     end
 
-    it 'debería lanzar error por no cumplir el invariante de vida' do
-      guerrero.vida = 100
-      guerrero.fuerza = 10
-
-      atacante = Guerrero.new
-      expect { atacante.vida = -200 }.to raise_error
+    it 'Luego de crear el guerrero, le asigno vida negativa y lanza error' do
+      expect { guerrero.vida = -200 }.to raise_error 'Fallo el invariante (vida >= 0)'
     end
 
-    it 'debería lanzar error por no cumplir el invariante de fuerza' do
+    it 'Luego de crear el guerrero, le asigno fuerza inválida y lanza error' do
       guerrero.vida = 100
-      guerrero.fuerza = 99
-
-      atacante = Guerrero.new
-      atacante.vida = 200
-      expect { atacante.fuerza = 2000 }.to raise_error
+      expect { guerrero.fuerza = 2000 }.to raise_error 'Fallo el invariante (fuerza > 0) and (fuerza < 100)'
     end
 
   # Qué pasa con invariantes sobre objetos afectados? Ej. la validación sobre vida del que recibe daño

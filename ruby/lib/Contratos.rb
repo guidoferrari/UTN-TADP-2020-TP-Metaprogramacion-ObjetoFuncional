@@ -1,4 +1,5 @@
 require_relative 'EjecutadorDeInvariante'
+require_relative 'EjecutadorDeCondiciones'
 
 module Contratos
   def self.included(klass)
@@ -14,6 +15,7 @@ module Contratos
     klass.instance_eval do
       @__invariantes__ = []
       @__accessors__ = []
+      @__preconditions__ = []
     end
   end
 
@@ -27,6 +29,14 @@ module Contratos
       @__invariantes__ << Invariante.new(bloque)
     end
 
+    def pre(&bloque)
+      @__preconditions__.push Precondicion.new(bloque)
+    end
+
+    def post(&bloque)
+      @post = Postcondicion.new(bloque)
+    end
+
     def attr_accessor(*args)
       @__accessors__ += args
       super
@@ -34,8 +44,6 @@ module Contratos
 
     def method_added(method_name)
       __no_recursivo__ do
-
-        puts "Se agrego el metodo #{method_name}."
 
         metodo_viejo = self.instance_method(method_name)
 
@@ -46,12 +54,18 @@ module Contratos
 
         invariantes = @__invariantes__
         accesors = @__accessors__
+        precondiciones = @__preconditions__
+        postcondicion = @pre
 
         puts "Redefiniendo el metodo #{method_name}."
 
         self.define_method(method_name) do |*args, &block|
+          binded_method = metodo_viejo.bind(self)
+
+          EjecutadorDeCondiciones.ejecutar_condicion(binded_method, *args, 'precondition', precondiciones.pop()) if precondiciones.first != nil
+
           self.instance_exec &ejecutarAntes if ejecutarAntes
-          resultado = metodo_viejo.bind(self).call(*args)
+          resultado = binded_method.call(*args)
           self.instance_exec &ejecutarDespues if ejecutarDespues
 
           unless accesors.include? method_name.to_sym
@@ -59,6 +73,8 @@ module Contratos
           end
 
           resultado
+
+          puts "FINISH redefiniendo #{method_name}."
         end
       end
     end
@@ -86,6 +102,22 @@ module Contratos
   end
 
   class Invariante
+    attr_accessor :bloque
+
+    def initialize(bloque)
+      @bloque = bloque
+    end
+  end
+
+  class Precondicion
+    attr_accessor :bloque
+
+    def initialize(bloque)
+      @bloque = bloque
+    end
+  end
+
+  class Postcondicion
     attr_accessor :bloque
 
     def initialize(bloque)

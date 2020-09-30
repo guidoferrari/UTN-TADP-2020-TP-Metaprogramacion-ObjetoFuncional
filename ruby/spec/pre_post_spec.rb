@@ -1,16 +1,17 @@
-describe MiClase do
-  let(:miClase) { MiClase.new}
+describe Operaciones do
+  let(:operaciones) { Operaciones.new}
 
   describe '#beforeAndAfter' do
-    it 'debería ejecutar el proc antes, el método, y por último el proc después' do
-      $stdout = StringIO.new
+    it 'Divido correctamente sin romper condiciones' do
+      expect(operaciones.dividir(10,2)).to be(5)
+    end
 
-      miClase.mensaje_1
+    it 'Resto correctamente, no hay validaciones' do
+      expect(operaciones.restar(10,2)).to be(8)
+    end
 
-      salida = $stdout.string.split("\n")
-      expect(salida[0]).to eq("Entré a un mensaje")
-      expect(salida[1]).to eq("mensaje_1")
-      expect(salida[2]).to eq("Salí de un mensaje" )
+    it 'Divido por 0, debe romper precondición' do
+      expect{operaciones.dividir(10,0)}.to raise_error 'Failed to meet precondition'
     end
   end
 end

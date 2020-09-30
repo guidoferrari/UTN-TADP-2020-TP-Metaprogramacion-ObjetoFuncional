@@ -7,7 +7,7 @@ class EjecutadorDeCondiciones
     parametros = metodoBindeado.send(:parameters).map { |x| x[1]}
     i = -1
     parametrosHash = Hash[parametros.map{|key| [key, args[i += 1]]}]
-    raise 'Failed to meet '+ tipoDeCondicion unless (lambda{condicion.bloque}.call_with_vars(parametrosHash))
+    raise 'Failed to meet '+ tipoDeCondicion unless (condicion.bloque.call_with_vars(parametrosHash))
   end
 end
 

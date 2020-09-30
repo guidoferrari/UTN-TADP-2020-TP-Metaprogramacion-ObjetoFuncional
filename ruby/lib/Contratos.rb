@@ -113,7 +113,7 @@ module Contratos
     attr_accessor :bloque
 
     def initialize(bloque)
-      @bloque = bloque
+      @bloque = Proc.new(&bloque)
     end
   end
 

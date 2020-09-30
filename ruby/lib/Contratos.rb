@@ -66,7 +66,7 @@ module Contratos
           binded_method = metodo_viejo.bind(self)
 
           #TODO: tendria un solo ejecutador... y le pasaria todo
-          EjecutadorDeCondiciones.ejecutar_condicion(binded_method, *args, 'precondition', precondicion) if precondicion != nil
+          EjecutadorDeCondiciones.new.ejecutar_condicion(binded_method, *args, 'precondition', precondicion) unless precondicion.nil?
 
           self.instance_exec &ejecutarAntes if ejecutarAntes
           resultado = binded_method.call(*args)

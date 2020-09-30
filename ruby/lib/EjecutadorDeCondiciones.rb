@@ -6,16 +6,13 @@ class EjecutadorDeCondiciones
 
   def ejecutar_condicion(metodo_bindeado, *args, tipo_condition, condicion)
     contexto = generar_contexto(args, metodo_bindeado)
-    # raise 'Failed to meet '+ tipo_condition unless (condicion.bloque.call_with_vars(parametrosHash))
+    raise 'Failed to meet '+ tipo_condition unless (contexto.instance_exec *args, &condicion.bloque)
   end
 
   private
 
   def obtener_bindings(args, metodo_bindeado)
-
-    # TODO DEBERIA GENERAR EL CONTEXTO NO SOLO CON PARAMETROS DEL METODO
-    # SI NO TAMBIEN CON METODOS DE INSTANCIA
-    parametros = metodoBindeado.unbind.parameters.map(&:last).zip(args).to_h
+    metodo_bindeado.unbind.parameters.map(&:last).zip(args).to_h
   end
 
   def generar_contexto(args, metodo_bindeado)
@@ -24,8 +21,8 @@ class EjecutadorDeCondiciones
     # SI NO TAMBIEN CON METODOS DE INSTANCIA
     bindings = obtener_bindings(args, metodo_bindeado)
     context = metodo_bindeado.receiver.clone
-
-    #TODO: continuar...
+    # TODO: ver que hacer con los bindings...
+    context
   end
 end
 

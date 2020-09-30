@@ -14,6 +14,7 @@ module Contratos
     klass.instance_eval do
       @__invariantes__ = []
       @__accessors__ = []
+      @__precondiciones__ = Hash.new
     end
   end
 
@@ -27,6 +28,10 @@ module Contratos
       @__invariantes__ << Invariante.new(bloque)
     end
 
+    def pre(&bloque)
+      @__bloque_precondicion__ = bloque
+    end
+
     def attr_accessor(*args)
       @__accessors__ += args
       super
@@ -34,8 +39,6 @@ module Contratos
 
     def method_added(method_name)
       __no_recursivo__ do
-
-        puts "Se agrego el metodo #{method_name}."
 
         metodo_viejo = self.instance_method(method_name)
 
@@ -46,10 +49,16 @@ module Contratos
 
         invariantes = @__invariantes__
         accesors = @__accessors__
+        @__precondiciones__[method_name] = @__bloque_precondicion__ if @__bloque_precondicion__
+        @__bloque_precondicion__ = nil
+        precondiciones = @__precondiciones__
 
         puts "Redefiniendo el metodo #{method_name}."
 
         self.define_method(method_name) do |*args, &block|
+
+          self.instance_exec &precondiciones[method_name] if precondiciones[method_name]
+
           self.instance_exec &ejecutarAntes if ejecutarAntes
           resultado = metodo_viejo.bind(self).call(*args)
           self.instance_exec &ejecutarDespues if ejecutarDespues

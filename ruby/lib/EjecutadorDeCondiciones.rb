@@ -16,7 +16,7 @@ class EjecutadorDeCondiciones
     parametros = metodoBindeado.send(:parameters).map { |x| x[1] }
 
     i = -1
-    parametrosHash = Hash[parametros.map { |key| [key, args[i += 1]] }]
+    Hash[parametros.map { |key| [key, args[i += 1]] }]
   end
 end
 

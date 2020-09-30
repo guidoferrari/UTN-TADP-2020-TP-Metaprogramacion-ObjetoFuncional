@@ -4,8 +4,8 @@ class Operaciones
   include Contratos
 
   #precondición de dividir
-  pre { puts "pre"}
-  #pre{ divisor != 0 }
+  #pre { puts "divisooooor" }
+  pre{ divisor != 0 }
   #postcondición de dividir
   #post{ |result| result * divisor == dividendo }
   #post { |result| result * divisor == dividendo }

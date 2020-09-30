@@ -1,4 +1,4 @@
-require 'sourcify'
+#require 'sourcify'
 class EjecutadorDeInvariante
 
   def self.block_to_s(&blk)

@@ -15,7 +15,6 @@ module Contratos
     klass.instance_eval do
       @__invariantes__ = []
       @__accessors__ = []
-      @__preconditions__ = []
     end
   end
 
@@ -30,11 +29,11 @@ module Contratos
     end
 
     def pre(&bloque)
-      @__preconditions__.push Precondicion.new(bloque)
+      @__precondition__ = Condition.new(bloque)
     end
 
     def post(&bloque)
-      @post = Postcondicion.new(bloque)
+      @__postcondition__ = Condition.new(bloque)
     end
 
     def attr_accessor(*args)
@@ -54,15 +53,19 @@ module Contratos
 
         invariantes = @__invariantes__
         accesors = @__accessors__
-        precondiciones = @__preconditions__
-        postcondicion = @pre
+
+        precondicion = @__precondition__
+        @__precondition__ = nil
+
+        postcondicion = @__postcondition__
+        @__postcondition__ = nil
 
         puts "Redefiniendo el metodo #{method_name}."
 
         self.define_method(method_name) do |*args, &block|
           binded_method = metodo_viejo.bind(self)
 
-          EjecutadorDeCondiciones.ejecutar_condicion(binded_method, *args, 'precondition', precondiciones.pop()) if precondiciones.first != nil
+          EjecutadorDeCondiciones.ejecutar_condicion(binded_method, *args, 'precondition', precondicion) if precondicion != nil
 
           self.instance_exec &ejecutarAntes if ejecutarAntes
           resultado = binded_method.call(*args)
@@ -74,7 +77,7 @@ module Contratos
 
           resultado
 
-          puts "FINISH redefiniendo #{method_name}."
+          #TODO EJECUTAR POST CONDICION MANDANDOLE EL RESULTADO COMO *ARGS
         end
       end
     end
@@ -109,7 +112,7 @@ module Contratos
     end
   end
 
-  class Precondicion
+  class Condition
     attr_accessor :bloque
 
     def initialize(bloque)
@@ -117,11 +120,4 @@ module Contratos
     end
   end
 
-  class Postcondicion
-    attr_accessor :bloque
-
-    def initialize(bloque)
-      @bloque = bloque
-    end
-  end
 end

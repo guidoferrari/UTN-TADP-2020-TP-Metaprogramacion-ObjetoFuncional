@@ -1,25 +1,35 @@
 require 'sourcify'
+
 class EjecutadorDeCondiciones
 
-  def self.ejecutar_condicion(metodoBindeado, *args, tipoDeCondicion, condicion)
-    parametrosHash = generarContexto(args, metodoBindeado)
-    raise 'Failed to meet '+ tipoDeCondicion unless (condicion.bloque.call_with_vars(parametrosHash))
+  attr_accessor :receptor
+
+  def ejecutar_condicion(metodo_bindeado, *args, tipo_condition, condicion)
+    contexto = generar_contexto(args, metodo_bindeado)
+    # raise 'Failed to meet '+ tipo_condition unless (condicion.bloque.call_with_vars(parametrosHash))
   end
 
   private
 
-  def self.generarContexto(args, metodoBindeado)
+  def obtener_bindings(args, metodo_bindeado)
 
     # TODO DEBERIA GENERAR EL CONTEXTO NO SOLO CON PARAMETROS DEL METODO
     # SI NO TAMBIEN CON METODOS DE INSTANCIA
+    parametros = metodoBindeado.unbind.parameters.map(&:last).zip(args).to_h
+  end
 
-    parametros = metodoBindeado.send(:parameters).map { |x| x[1] }
+  def generar_contexto(args, metodo_bindeado)
 
-    i = -1
-    Hash[parametros.map { |key| [key, args[i += 1]] }]
+    # TODO DEBERIA GENERAR EL CONTEXTO NO SOLO CON PARAMETROS DEL METODO
+    # SI NO TAMBIEN CON METODOS DE INSTANCIA
+    bindings = obtener_bindings(args, metodo_bindeado)
+    context = metodo_bindeado.receiver.clone
+
+    #TODO: continuar...
   end
 end
 
+#TODO: ver si realmente deberian usar un Struct o un clon del objeto receptor...
 class Proc
   def call_with_vars(vars, *args)
     Struct.new(*vars.keys).new(*vars.values).instance_exec(*args, &self)

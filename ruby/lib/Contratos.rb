@@ -29,10 +29,12 @@ module Contratos
     end
 
     def pre(&bloque)
+      #TODO: que pasa si hay mas de una precondicion?, deberia afectar a todos los metodos?
       @__precondition__ = Condition.new(bloque)
     end
 
     def post(&bloque)
+      #TODO: que pasa si hay mas de una postcondicion?, deberia afectar a todos los metodos?
       @__postcondition__ = Condition.new(bloque)
     end
 
@@ -54,17 +56,16 @@ module Contratos
         invariantes = @__invariantes__
         accesors = @__accessors__
 
-        precondicion = @__precondition__
-        @__precondition__ = nil
+        #TODO: refactorizar para soportar mas de una pre y postcondition y deberia afectar solo a un metodo. Como se sabe que afecta solo a x metodo?
+        precondicion = @__precondition__ || nil
 
-        postcondicion = @__postcondition__
-        @__postcondition__ = nil
+        postcondicion = @__postcondition__ || nil
 
-        puts "Redefiniendo el metodo #{method_name}."
 
         self.define_method(method_name) do |*args, &block|
           binded_method = metodo_viejo.bind(self)
 
+          #TODO: tendria un solo ejecutador... y le pasaria todo
           EjecutadorDeCondiciones.ejecutar_condicion(binded_method, *args, 'precondition', precondicion) if precondicion != nil
 
           self.instance_exec &ejecutarAntes if ejecutarAntes

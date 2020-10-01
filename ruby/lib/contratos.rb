@@ -31,9 +31,9 @@ module Contratos
           ejecutador = Ejecutador.new(metodo_viejo, self, precondiciones, postcondiciones, ejecutar_antes, ejecutar_despues, invariantes, *args)
 
           ejecutador.ejecutar_precondiciones
-          ejecutador.ejecutar_antes if ejecutar_antes
+          ejecutador.ejecutar_antes
           resultado = ejecutador.ejecutar_metodo
-          ejecutador.ejecutar_despues if ejecutar_despues
+          ejecutador.ejecutar_despues
           ejecutador.ejecutar_invariantes unless accesors.include? method_name.to_sym
           ejecutador.ejecutar_postcondiciones
           resultado

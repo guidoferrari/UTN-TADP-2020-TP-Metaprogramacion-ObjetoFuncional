@@ -27,7 +27,7 @@ module Contratos
 
         accessors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones = guardar_variables_instancia(method_name)
 
-        self.define_method(method_name) do |*args, &block|
+        self.define_method(method_name) do |*args|
           ejecutador = Ejecutador.new(metodo_viejo, self, precondiciones, postcondiciones, ejecutar_antes, ejecutar_despues, invariantes, accessors, *args)
 
           ejecutador.ejecutar_precondiciones
@@ -78,19 +78,13 @@ module Contratos
 
     def guardar_variables_instancia(method_name)
       metodo_viejo = self.instance_method(method_name)
-
-      if @__antes_despues__
-        ejecutar_antes = @__antes_despues__.antes
-        ejecutar_despues = @__antes_despues__.despues
-      end
-
+      ejecutar_antes = @__antes_despues__.antes unless @__antes_despues__.nil?
+      ejecutar_despues = @__antes_despues__.despues unless @__antes_despues__.nil?
       invariantes = @__invariantes__
       accessors = @__accessors__
-
       precondiciones = @__precondiciones__
-      @__precondiciones__ = []
-
       postcondiciones = @__postcondiciones__
+      @__precondiciones__ = []
       @__postcondiciones__ = []
 
       return accessors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones

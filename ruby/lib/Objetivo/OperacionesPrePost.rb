@@ -1,4 +1,4 @@
-require_relative '../Contratos'
+require_relative '../contratos'
 
 class Operaciones
   include Contratos

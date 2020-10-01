@@ -1,5 +1,6 @@
 require_relative 'EjecutadorDeInvariante'
 require_relative 'EjecutadorDeCondiciones'
+require_relative 'ejecutador'
 
 module Contratos
   def self.included(klass)
@@ -60,25 +61,15 @@ module Contratos
         postcondicion = @__postcondition__
         @__postcondition__ = nil
 
-
         self.define_method(method_name) do |*args, &block|
 
-          binded_method = metodo_viejo.bind(self)
-
-          EjecutadorDeCondiciones.new.ejecutar_condicion(binded_method, *args, 'precondition', precondicion, nil) unless precondicion.nil?
-
-          self.instance_exec &ejecutarAntes if ejecutarAntes
-
-          resultado = binded_method.call(*args)
-
-          self.instance_exec &ejecutarDespues if ejecutarDespues
-
-          unless accesors.include? method_name.to_sym
-            EjecutadorDeInvariante.ejecutar_invariantes(self, invariantes)
-          end
-
-          EjecutadorDeCondiciones.new.ejecutar_condicion(binded_method, *args, 'postcondition', postcondicion, resultado) unless postcondicion.nil?
-
+          ejecutador = Ejecutador.new(metodo_viejo, self, *args)
+          ejecutador.ejecutar_condicion('precondition', precondicion, nil) unless precondicion.nil?
+          ejecutador.ejecutar(&ejecutarAntes) if ejecutarAntes
+          resultado = ejecutador.ejecutarMetodo
+          ejecutador.ejecutar(&ejecutarDespues) if ejecutarDespues
+          ejecutador.ejecutar_invariantes(invariantes) unless accesors.include? method_name.to_sym
+          ejecutador.ejecutar_condicion('postcondition', postcondicion, resultado) unless postcondicion.nil?
           resultado
         end
       end

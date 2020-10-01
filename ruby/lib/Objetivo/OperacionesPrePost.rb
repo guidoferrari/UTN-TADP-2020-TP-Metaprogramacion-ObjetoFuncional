@@ -1,4 +1,4 @@
-require_relative '../Contratos'
+require_relative '../contratos'
 
 class Operaciones
   include Contratos
@@ -6,9 +6,9 @@ class Operaciones
   #precondición de dividir
   pre{ divisor != 0 }
   #postcondición de dividir
-  #post{ |result| result * divisor == dividendo }
+  post{ |result| result * divisor == dividendo }
   def dividir(dividendo, divisor)
-    dividendo / divisor
+    resultado = dividendo / divisor
   end
 
   # este método no se ve afectado por ninguna pre/post condición

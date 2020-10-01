@@ -1,4 +1,4 @@
-require_relative '../Contratos'
+require_relative '../contratos'
 
 class MiClase
   include Contratos

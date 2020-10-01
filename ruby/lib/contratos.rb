@@ -1,5 +1,4 @@
-require_relative 'EjecutadorDeInvariante'
-require_relative 'EjecutadorDeCondiciones'
+require_relative 'ejecutador'
 
 module Contratos
   def self.included(klass)
@@ -29,12 +28,10 @@ module Contratos
     end
 
     def pre(&bloque)
-      #TODO: que pasa si hay mas de una precondicion?, deberia afectar a todos los metodos?
       @__precondition__ = Condition.new(bloque)
     end
 
     def post(&bloque)
-      #TODO: que pasa si hay mas de una postcondicion?, deberia afectar a todos los metodos?
       @__postcondition__ = Condition.new(bloque)
     end
 
@@ -56,29 +53,22 @@ module Contratos
         invariantes = @__invariantes__
         accesors = @__accessors__
 
-        #TODO: refactorizar para soportar mas de una pre y postcondition y deberia afectar solo a un metodo. Como se sabe que afecta solo a x metodo?
-        precondicion = @__precondition__ || nil
+        precondicion = @__precondition__
+        @__precondition__ = nil
 
-        postcondicion = @__postcondition__ || nil
-
+        postcondicion = @__postcondition__
+        @__postcondition__ = nil
 
         self.define_method(method_name) do |*args, &block|
-          binded_method = metodo_viejo.bind(self)
 
-          #TODO: tendria un solo ejecutador... y le pasaria todo
-          EjecutadorDeCondiciones.new.ejecutar_condicion(binded_method, *args, 'precondition', precondicion) unless precondicion.nil?
-
-          self.instance_exec &ejecutarAntes if ejecutarAntes
-          resultado = binded_method.call(*args)
-          self.instance_exec &ejecutarDespues if ejecutarDespues
-
-          unless accesors.include? method_name.to_sym
-            EjecutadorDeInvariante.ejecutar_invariantes(self, invariantes)
-          end
-
+          ejecutador = Ejecutador.new(metodo_viejo, self, *args)
+          ejecutador.ejecutar_condicion('precondition', precondicion, nil) unless precondicion.nil?
+          ejecutador.ejecutar(&ejecutarAntes) if ejecutarAntes
+          resultado = ejecutador.ejecutarMetodo
+          ejecutador.ejecutar(&ejecutarDespues) if ejecutarDespues
+          ejecutador.ejecutar_invariantes(invariantes) unless accesors.include? method_name.to_sym
+          ejecutador.ejecutar_condicion('postcondition', postcondicion, resultado) unless postcondicion.nil?
           resultado
-
-          #TODO EJECUTAR POST CONDICION MANDANDOLE EL RESULTADO COMO *ARGS
         end
       end
     end
@@ -120,5 +110,4 @@ module Contratos
       @bloque = Proc.new(&bloque)
     end
   end
-
 end

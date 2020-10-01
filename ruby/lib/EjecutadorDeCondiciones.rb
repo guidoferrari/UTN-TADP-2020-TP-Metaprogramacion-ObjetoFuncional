@@ -17,11 +17,11 @@ class EjecutadorDeCondiciones
 
   def generar_contexto(args, metodo_bindeado)
 
-    # TODO DEBERIA GENERAR EL CONTEXTO NO SOLO CON PARAMETROS DEL METODO
-    # SI NO TAMBIEN CON METODOS DE INSTANCIA
     bindings = obtener_bindings(args, metodo_bindeado)
     context = metodo_bindeado.receiver.clone
-    # TODO: ver que hacer con los bindings...
+
+    bindings.each { |nombre, valor| context.singleton_class.send(:define_method, nombre) {valor} }
+
     context
   end
 end

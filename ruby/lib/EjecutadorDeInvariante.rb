@@ -6,7 +6,7 @@ class EjecutadorDeInvariante
   end
 
   def self.ejecutar_invariante(contexto, invariante)
-    raise 'Fallo el invariante '+ block_to_s(&invariante.bloque) unless (evaluar_invariante(contexto, invariante))
+    raise 'Invariant failed: '+ block_to_s(&invariante.bloque) unless (evaluar_invariante(contexto, invariante))
   end
 
   def self.evaluar_invariante(contexto, invariante)

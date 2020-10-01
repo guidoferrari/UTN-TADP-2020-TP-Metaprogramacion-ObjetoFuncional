@@ -1,4 +1,8 @@
+require_relative '../Contratos'
+
 class Pila
+  include Contratos
+
   attr_accessor :current_node, :capacity
 
   invariant { capacity >= 0 }
@@ -9,20 +13,20 @@ class Pila
     @current_node = nil
   end
 
-  #pre { !full? }
-  #post { height > 0 }
+  pre { !full? }
+  post { height > 0 }
   def push(element)
     @current_node = Node.new(element, current_node)
   end
 
-  #pre { !empty? }
+  pre { !empty? }
   def pop
     element = top
     @current_node = @current_node.next_node
     element
   end
 
-  #pre { !empty? }
+  pre { !empty? }
   def top
     current_node.element
   end

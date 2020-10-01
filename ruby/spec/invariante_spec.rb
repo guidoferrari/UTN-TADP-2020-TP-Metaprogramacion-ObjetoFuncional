@@ -13,12 +13,12 @@ describe Guerrero do
     end
 
     it 'Luego de crear el guerrero, le asigno vida negativa y lanza error' do
-      expect { guerrero.vida = -200 }.to raise_error 'Fallo el invariante (vida >= 0)'
+      expect { guerrero.vida = -200 }.to raise_error 'Invariant failed: (vida >= 0)'
     end
 
     it 'Luego de crear el guerrero, le asigno fuerza inválida y lanza error' do
       guerrero.vida = 100
-      expect { guerrero.fuerza = 2000 }.to raise_error 'Fallo el invariante (fuerza > 0) and (fuerza < 100)'
+      expect { guerrero.fuerza = 2000 }.to raise_error 'Invariant failed: (fuerza > 0) and (fuerza < 100)'
     end
 
     it 'Intento atacar a otro guerrero para dejarlo en vida negativa, lanza error' do
@@ -29,7 +29,7 @@ describe Guerrero do
       otroGuerrero.fuerza = 10
       otroGuerrero.vida = 50
 
-      expect { guerrero.atacar(otroGuerrero) }.to raise_error 'Fallo el invariante (vida >= 0)'
+      expect { guerrero.atacar(otroGuerrero) }.to raise_error 'Invariant failed: (vida >= 0)'
     end
   end
 end

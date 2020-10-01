@@ -1,5 +1,3 @@
-require_relative 'EjecutadorDeInvariante'
-require_relative 'EjecutadorDeCondiciones'
 require_relative 'ejecutador'
 
 module Contratos

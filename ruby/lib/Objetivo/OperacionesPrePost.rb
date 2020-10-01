@@ -12,4 +12,10 @@ class Operaciones
   def restar(minuendo, sustraendo)
     minuendo - sustraendo
   end
+
+  pre{puts "Esto no es una aserción"}
+  post{|resultado| resultado == unSumando - (otroSumando * -1)}
+  def sumar(unSumando, otroSumando)
+    unSumando + otroSumando
+  end
 end

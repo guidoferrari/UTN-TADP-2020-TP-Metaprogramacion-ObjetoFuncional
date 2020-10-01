@@ -58,7 +58,8 @@ class Ejecutador
   end
 
   def ejecutar_condicion(contexto, tipo_condicion, condicion)
-    raise 'Failed to meet '+ tipo_condicion if (contexto.instance_exec @resultado, &condicion) == false
+    resultado_de_condicion = contexto.instance_exec @resultado, &condicion
+    raise 'Failed to meet '+ tipo_condicion unless (resultado_de_condicion.nil? || resultado_de_condicion)
   end
 
   def ejecutar_invariante(invariante)

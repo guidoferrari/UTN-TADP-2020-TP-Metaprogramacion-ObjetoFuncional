@@ -53,8 +53,8 @@ module Contratos
       end
     end
 
-    def before_and_after_each_call(procAntes, procDespues)
-      @__antes_despues__ = AntesDespues.new(procAntes, procDespues)
+    def before_and_after_each_call(proc_antes, proc_despues)
+      @__antes_despues__ = AntesDespues.new(proc_antes, proc_despues)
     end
 
     def invariant(&bloque)

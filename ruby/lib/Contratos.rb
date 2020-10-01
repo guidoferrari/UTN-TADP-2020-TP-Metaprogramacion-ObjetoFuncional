@@ -62,19 +62,22 @@ module Contratos
 
 
         self.define_method(method_name) do |*args, &block|
+
           binded_method = metodo_viejo.bind(self)
 
-          EjecutadorDeCondiciones.new.ejecutar_condicion(binded_method, *args, 'precondition', precondicion) unless precondicion.nil?
+          EjecutadorDeCondiciones.new.ejecutar_condicion(binded_method, *args, 'precondition', precondicion, nil) unless precondicion.nil?
 
           self.instance_exec &ejecutarAntes if ejecutarAntes
+
           resultado = binded_method.call(*args)
+
           self.instance_exec &ejecutarDespues if ejecutarDespues
 
           unless accesors.include? method_name.to_sym
             EjecutadorDeInvariante.ejecutar_invariantes(self, invariantes)
           end
 
-          EjecutadorDeCondiciones.new.ejecutar_condicion(binded_method, resultado, 'postcondition', postcondicion) unless postcondicion.nil?
+          EjecutadorDeCondiciones.new.ejecutar_condicion(binded_method, *args, 'postcondition', postcondicion, resultado) unless postcondicion.nil?
 
           resultado
         end
@@ -118,5 +121,4 @@ module Contratos
       @bloque = Proc.new(&bloque)
     end
   end
-
 end

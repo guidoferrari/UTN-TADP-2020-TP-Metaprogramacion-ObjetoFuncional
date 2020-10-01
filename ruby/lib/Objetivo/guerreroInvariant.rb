@@ -10,6 +10,7 @@ class Guerrero
 
   def atacar(otro)
     otro.vida -= fuerza
+    puts otro.vida
   end
 
 end

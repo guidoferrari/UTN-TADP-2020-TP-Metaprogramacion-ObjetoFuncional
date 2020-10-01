@@ -2,11 +2,10 @@ require 'sourcify'
 
 class EjecutadorDeCondiciones
 
-  attr_accessor :receptor
-
-  def ejecutar_condicion(metodo_bindeado, *args, tipo_condition, condicion)
+  def ejecutar_condicion(metodo_bindeado, *args, tipo_condition, condicion, resultado)
     contexto = generar_contexto(args, metodo_bindeado)
-    raise 'Failed to meet '+ tipo_condition unless (contexto.instance_exec *args, &condicion.bloque)
+
+    raise 'Failed to meet '+ tipo_condition unless (contexto.instance_exec resultado, &condicion.bloque)
   end
 
   private
@@ -21,14 +20,6 @@ class EjecutadorDeCondiciones
     context = metodo_bindeado.receiver.clone
 
     bindings.each { |nombre, valor| context.singleton_class.send(:define_method, nombre) {valor} }
-
     context
-  end
-end
-
-#TODO: ver si realmente deberian usar un Struct o un clon del objeto receptor...
-class Proc
-  def call_with_vars(vars, *args)
-    Struct.new(*vars.keys).new(*vars.values).instance_exec(*args, &self)
   end
 end

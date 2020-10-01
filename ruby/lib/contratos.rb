@@ -15,6 +15,8 @@ module Contratos
     klass.instance_eval do
       @__invariantes__ = []
       @__accessors__ = []
+      @__precondiciones__ = []
+      @__postcondiciones__ = []
     end
   end
 
@@ -23,19 +25,17 @@ module Contratos
     def method_added(method_name)
       __no_recursivo__ do
 
-        accesors, ejecutarAntes, ejecutarDespues, invariantes, metodo_viejo, postcondicion, precondicion = guardar_variables_instancia(method_name)
+        accesors, ejecutarAntes, ejecutarDespues, invariantes, metodo_viejo, postcondiciones, precondiciones = guardar_variables_instancia(method_name)
 
         self.define_method(method_name) do |*args, &block|
-
           ejecutador = Ejecutador.new(metodo_viejo, self, *args)
-          ejecutador.ejecutar_condicion('precondition', precondicion, nil) unless precondicion.nil?
+          ejecutador.ejecutar_condiciones('precondition', precondiciones, nil)
           ejecutador.ejecutar(&ejecutarAntes) if ejecutarAntes
           resultado = ejecutador.ejecutarMetodo
           ejecutador.ejecutar(&ejecutarDespues) if ejecutarDespues
           ejecutador.ejecutar_invariantes(invariantes) unless accesors.include? method_name.to_sym
-          ejecutador.ejecutar_condicion('postcondition', postcondicion, resultado) unless postcondicion.nil?
+          ejecutador.ejecutar_condiciones('postcondition', postcondiciones, resultado)
           resultado
-
         end
       end
     end
@@ -57,15 +57,15 @@ module Contratos
     end
 
     def invariant(&bloque)
-      @__invariantes__ << Invariante.new(bloque)
+      @__invariantes__ << Proc.new(&bloque)
     end
 
     def pre(&bloque)
-      @__precondition__ = Condition.new(bloque)
+      @__precondiciones__ << Proc.new(&bloque)
     end
 
     def post(&bloque)
-      @__postcondition__ = Condition.new(bloque)
+      @__postcondiciones__ << Proc.new(&bloque)
     end
 
     def attr_accessor(*args)
@@ -86,12 +86,13 @@ module Contratos
       invariantes = @__invariantes__
       accesors = @__accessors__
 
-      precondicion = @__precondition__
-      @__precondition__ = nil
+      precondiciones = @__precondiciones__
+      @__precondiciones__ = []
 
-      postcondicion = @__postcondition__
-      @__postcondition__ = nil
-      return accesors, ejecutarAntes, ejecutarDespues, invariantes, metodo_viejo, postcondicion, precondicion
+      postcondiciones = @__postcondiciones__
+      @__postcondiciones__ = []
+
+      return accesors, ejecutarAntes, ejecutarDespues, invariantes, metodo_viejo, postcondiciones, precondiciones
     end
   end
 
@@ -101,22 +102,6 @@ module Contratos
     def initialize(antes, despues)
       @antes = antes
       @despues = despues
-    end
-  end
-
-  class Invariante
-    attr_accessor :bloque
-
-    def initialize(bloque)
-      @bloque = bloque
-    end
-  end
-
-  class Condition
-    attr_accessor :bloque
-
-    def initialize(bloque)
-      @bloque = Proc.new(&bloque)
     end
   end
 end

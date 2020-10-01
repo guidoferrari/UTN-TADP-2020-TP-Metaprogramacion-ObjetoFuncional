@@ -16,10 +16,12 @@ class Ejecutador
     @instancia.instance_exec &bloque
   end
 
-  def ejecutar_condicion(tipo_condition, condicion, resultado)
+  def ejecutar_condiciones(tipo_condition, condiciones, resultado)
     contexto = generar_contexto(@args, @metodo.bind(@instancia))
-    raise 'Failed to meet '+ tipo_condition unless (contexto.instance_exec resultado, &condicion.bloque)
+    condiciones.each {|condicion| ejecutar_condicion(contexto, tipo_condition, condicion, resultado)}
   end
+
+
 
   def ejecutar_invariantes(invariantes)
     invariantes.each {|invariante| ejecutar_invariante(invariante)}
@@ -35,13 +37,17 @@ class Ejecutador
     context
   end
 
+  def ejecutar_condicion(contexto, tipo_condicion, condicion, resultado)
+    raise 'Failed to meet '+ tipo_condicion unless (contexto.instance_exec resultado, &condicion)
+  end
+
   def ejecutar_invariante(invariante)
-    raise 'Invariant failed: '+ block_to_s(&invariante.bloque) unless (evaluar_invariante(invariante))
+    raise 'Invariant failed: '+ block_to_s(&invariante) unless (evaluar_invariante(invariante))
   end
 
   def evaluar_invariante(invariante)
     begin
-      @instancia.instance_exec &invariante.bloque
+      @instancia.instance_exec &invariante
     rescue NoMethodError => e
       true
     end

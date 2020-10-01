@@ -25,16 +25,16 @@ module Contratos
     def method_added(method_name)
       __no_recursivo__ do
 
-        accesors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones = guardar_variables_instancia(method_name)
+        accessors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones = guardar_variables_instancia(method_name)
 
         self.define_method(method_name) do |*args, &block|
-          ejecutador = Ejecutador.new(metodo_viejo, self, precondiciones, postcondiciones, ejecutar_antes, ejecutar_despues, invariantes, *args)
+          ejecutador = Ejecutador.new(metodo_viejo, self, precondiciones, postcondiciones, ejecutar_antes, ejecutar_despues, invariantes, accessors, *args)
 
           ejecutador.ejecutar_precondiciones
           ejecutador.ejecutar_antes
           resultado = ejecutador.ejecutar_metodo
           ejecutador.ejecutar_despues
-          ejecutador.ejecutar_invariantes unless accesors.include? method_name.to_sym
+          ejecutador.ejecutar_invariantes
           ejecutador.ejecutar_postcondiciones
           resultado
         end
@@ -85,7 +85,7 @@ module Contratos
       end
 
       invariantes = @__invariantes__
-      accesors = @__accessors__
+      accessors = @__accessors__
 
       precondiciones = @__precondiciones__
       @__precondiciones__ = []
@@ -93,7 +93,7 @@ module Contratos
       postcondiciones = @__postcondiciones__
       @__postcondiciones__ = []
 
-      return accesors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones
+      return accessors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones
     end
   end
 

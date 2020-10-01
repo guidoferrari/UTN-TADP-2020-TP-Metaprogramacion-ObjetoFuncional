@@ -2,7 +2,7 @@ require 'sourcify'
 
 class Ejecutador
 
-  def initialize(metodo, instancia, precondiciones, postcondiciones, ejecutarAntes, ejecutarDespues, invariantes, *args)
+  def initialize(metodo, instancia, precondiciones, postcondiciones, ejecutarAntes, ejecutarDespues, invariantes, accessors, *args)
     @metodo = metodo
     @instancia = instancia
     @args = *args
@@ -11,6 +11,7 @@ class Ejecutador
     @ejecutarAntes = ejecutarAntes
     @ejecutarDespues = ejecutarDespues
     @invariantes = invariantes
+    @accessors = accessors
   end
 
   def ejecutar_metodo
@@ -34,7 +35,7 @@ class Ejecutador
   end
 
   def ejecutar_invariantes
-    @invariantes.each {|invariante| ejecutar_invariante(invariante)}
+    @invariantes.each {|invariante| ejecutar_invariante(invariante)} unless @accessors.include? @metodo.name.to_sym
   end
 
   private

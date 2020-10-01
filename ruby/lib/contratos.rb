@@ -25,16 +25,17 @@ module Contratos
     def method_added(method_name)
       __no_recursivo__ do
 
-        accesors, ejecutarAntes, ejecutarDespues, invariantes, metodo_viejo, postcondiciones, precondiciones = guardar_variables_instancia(method_name)
+        accesors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones = guardar_variables_instancia(method_name)
 
         self.define_method(method_name) do |*args, &block|
-          ejecutador = Ejecutador.new(metodo_viejo, self, *args)
-          ejecutador.ejecutar_condiciones('precondition', precondiciones, nil)
-          ejecutador.ejecutar(&ejecutarAntes) if ejecutarAntes
-          resultado = ejecutador.ejecutarMetodo
-          ejecutador.ejecutar(&ejecutarDespues) if ejecutarDespues
-          ejecutador.ejecutar_invariantes(invariantes) unless accesors.include? method_name.to_sym
-          ejecutador.ejecutar_condiciones('postcondition', postcondiciones, resultado)
+          ejecutador = Ejecutador.new(metodo_viejo, self, precondiciones, postcondiciones, ejecutar_antes, ejecutar_despues, invariantes, *args)
+
+          ejecutador.ejecutar_precondiciones
+          ejecutador.ejecutar_antes if ejecutar_antes
+          resultado = ejecutador.ejecutar_metodo
+          ejecutador.ejecutar_despues if ejecutar_despues
+          ejecutador.ejecutar_invariantes unless accesors.include? method_name.to_sym
+          ejecutador.ejecutar_postcondiciones
           resultado
         end
       end
@@ -79,8 +80,8 @@ module Contratos
       metodo_viejo = self.instance_method(method_name)
 
       if @__antes_despues__
-        ejecutarAntes = @__antes_despues__.antes
-        ejecutarDespues = @__antes_despues__.despues
+        ejecutar_antes = @__antes_despues__.antes
+        ejecutar_despues = @__antes_despues__.despues
       end
 
       invariantes = @__invariantes__
@@ -92,7 +93,7 @@ module Contratos
       postcondiciones = @__postcondiciones__
       @__postcondiciones__ = []
 
-      return accesors, ejecutarAntes, ejecutarDespues, invariantes, metodo_viejo, postcondiciones, precondiciones
+      return accesors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones
     end
   end
 

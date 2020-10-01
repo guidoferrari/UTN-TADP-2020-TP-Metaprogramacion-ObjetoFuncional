@@ -2,29 +2,39 @@ require 'sourcify'
 
 class Ejecutador
 
-  def initialize(metodo, instancia, *args)
+  def initialize(metodo, instancia, precondiciones, postcondiciones, ejecutarAntes, ejecutarDespues, invariantes, *args)
     @metodo = metodo
     @instancia = instancia
     @args = *args
+    @precondiciones = precondiciones
+    @postcondiciones = postcondiciones
+    @ejecutarAntes = ejecutarAntes
+    @ejecutarDespues = ejecutarDespues
+    @invariantes = invariantes
   end
 
-  def ejecutarMetodo
-    @metodo.bind(@instancia).call(*@args)
+  def ejecutar_metodo
+    @resultado = @metodo.bind(@instancia).call(*@args)
   end
 
-  def ejecutar(&bloque)
-    @instancia.instance_exec &bloque
+  def ejecutar_antes
+    ejecutar(&@ejecutarAntes)
   end
 
-  def ejecutar_condiciones(tipo_condition, condiciones, resultado)
-    contexto = generar_contexto(@args, @metodo.bind(@instancia))
-    condiciones.each {|condicion| ejecutar_condicion(contexto, tipo_condition, condicion, resultado)}
+  def ejecutar_despues
+    ejecutar(&@ejecutarDespues)
   end
 
+  def ejecutar_precondiciones
+    ejecutar_condiciones('precondition', @precondiciones)
+  end
 
+  def ejecutar_postcondiciones
+    ejecutar_condiciones('postcondition', @postcondiciones)
+  end
 
-  def ejecutar_invariantes(invariantes)
-    invariantes.each {|invariante| ejecutar_invariante(invariante)}
+  def ejecutar_invariantes
+    @invariantes.each {|invariante| ejecutar_invariante(invariante)}
   end
 
   private
@@ -37,8 +47,17 @@ class Ejecutador
     context
   end
 
-  def ejecutar_condicion(contexto, tipo_condicion, condicion, resultado)
-    raise 'Failed to meet '+ tipo_condicion unless (contexto.instance_exec resultado, &condicion)
+  def ejecutar(&bloque)
+    @instancia.instance_exec &bloque
+  end
+
+  def ejecutar_condiciones(tipo_condition, condiciones)
+    contexto = generar_contexto(@args, @metodo.bind(@instancia))
+    condiciones.each {|condicion| ejecutar_condicion(contexto, tipo_condition, condicion)}
+  end
+
+  def ejecutar_condicion(contexto, tipo_condicion, condicion)
+    raise 'Failed to meet '+ tipo_condicion unless (contexto.instance_exec @resultado, &condicion)
   end
 
   def ejecutar_invariante(invariante)

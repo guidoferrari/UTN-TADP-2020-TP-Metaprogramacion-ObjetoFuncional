@@ -2,14 +2,14 @@ require 'sourcify'
 
 class Ejecutador
 
-  def initialize(metodo, instancia, precondiciones, postcondiciones, ejecutarAntes, ejecutarDespues, invariantes, accessors, *args)
+  def initialize(metodo, instancia, precondiciones, postcondiciones, ejecutar_antes, ejecutar_despues, invariantes, accessors, *args)
     @metodo = metodo
     @instancia = instancia
     @args = *args
     @precondiciones = precondiciones
     @postcondiciones = postcondiciones
-    @ejecutarAntes = ejecutarAntes
-    @ejecutarDespues = ejecutarDespues
+    @ejecutar_antes = ejecutar_antes
+    @ejecutar_despues = ejecutar_despues
     @invariantes = invariantes
     @accessors = accessors
   end
@@ -19,11 +19,11 @@ class Ejecutador
   end
 
   def ejecutar_antes
-    ejecutar(&@ejecutarAntes)
+    ejecutar(&@ejecutar_antes)
   end
 
   def ejecutar_despues
-    ejecutar(&@ejecutarDespues)
+    ejecutar(&@ejecutar_despues)
   end
 
   def ejecutar_precondiciones

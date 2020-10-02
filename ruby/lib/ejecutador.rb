@@ -63,7 +63,7 @@ class Ejecutador
   end
 
   def ejecutar_invariante(invariante)
-    raise 'Invariant failed: '+ block_to_s(&invariante) unless (evaluar_invariante(invariante))
+    raise 'Invariant failed: ' + block_to_s(&invariante) unless (evaluar_invariante(invariante))
   end
 
   def evaluar_invariante(invariante)

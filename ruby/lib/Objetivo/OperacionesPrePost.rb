@@ -15,6 +15,7 @@ class Operaciones
 
   pre{puts "Esto no es una aserción"}
   post{|resultado| resultado == unSumando - (otroSumando * -1)}
+  post{nil}
   def sumar(unSumando, otroSumando)
     unSumando + otroSumando
   end

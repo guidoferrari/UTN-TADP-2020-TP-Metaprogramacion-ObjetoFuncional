@@ -1,6 +1,7 @@
 require_relative 'ejecutador'
 
 module Contratos
+
   def self.included(klass)
     inicializar_controlados(klass)
     if klass == Class
@@ -14,60 +15,27 @@ module Contratos
     klass.instance_eval do
       @__invariantes__ = []
       @__accessors__ = []
+      @__precondiciones__ = []
+      @__postcondiciones__ = []
     end
   end
 
   module ClassMethods
 
-    def before_and_after_each_call(procAntes, procDespues)
-      @__antes_despues__ = AntesDespues.new(procAntes, procDespues)
-    end
-
-    def invariant(&bloque)
-      @__invariantes__ << Invariante.new(bloque)
-    end
-
-    def pre(&bloque)
-      @__precondition__ = Condition.new(bloque)
-    end
-
-    def post(&bloque)
-      @__postcondition__ = Condition.new(bloque)
-    end
-
-    def attr_accessor(*args)
-      @__accessors__ += args
-      super
-    end
-
     def method_added(method_name)
       __no_recursivo__ do
 
-        metodo_viejo = self.instance_method(method_name)
+        accessors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones = guardar_variables_instancia(method_name)
 
-        if @__antes_despues__
-          ejecutarAntes = @__antes_despues__.antes
-          ejecutarDespues = @__antes_despues__.despues
-        end
+        self.define_method(method_name) do |*args|
+          ejecutador = Ejecutador.new(metodo_viejo, self, precondiciones, postcondiciones, ejecutar_antes, ejecutar_despues, invariantes, accessors, *args)
 
-        invariantes = @__invariantes__
-        accesors = @__accessors__
-
-        precondicion = @__precondition__
-        @__precondition__ = nil
-
-        postcondicion = @__postcondition__
-        @__postcondition__ = nil
-
-        self.define_method(method_name) do |*args, &block|
-
-          ejecutador = Ejecutador.new(metodo_viejo, self, *args)
-          ejecutador.ejecutar_condicion('precondition', precondicion, nil) unless precondicion.nil?
-          ejecutador.ejecutar(&ejecutarAntes) if ejecutarAntes
-          resultado = ejecutador.ejecutarMetodo
-          ejecutador.ejecutar(&ejecutarDespues) if ejecutarDespues
-          ejecutador.ejecutar_invariantes(invariantes) unless accesors.include? method_name.to_sym
-          ejecutador.ejecutar_condicion('postcondition', postcondicion, resultado) unless postcondicion.nil?
+          ejecutador.ejecutar_precondiciones
+          ejecutador.ejecutar_antes
+          resultado = ejecutador.ejecutar_metodo
+          ejecutador.ejecutar_despues
+          ejecutador.ejecutar_invariantes
+          ejecutador.ejecutar_postcondiciones
           resultado
         end
       end
@@ -84,6 +52,43 @@ module Contratos
         Thread.current[:__ejecutando__] = false
       end
     end
+
+    def before_and_after_each_call(proc_antes, proc_despues)
+      @__antes_despues__ = AntesDespues.new(proc_antes, proc_despues)
+    end
+
+    def invariant(&bloque)
+      @__invariantes__ << Proc.new(&bloque)
+    end
+
+    def pre(&bloque)
+      @__precondiciones__ << Proc.new(&bloque)
+    end
+
+    def post(&bloque)
+      @__postcondiciones__ << Proc.new(&bloque)
+    end
+
+    def attr_accessor(*args)
+      @__accessors__ += args
+      super
+    end
+
+    private
+
+    def guardar_variables_instancia(method_name)
+      metodo_viejo = self.instance_method(method_name)
+      ejecutar_antes = @__antes_despues__.antes unless @__antes_despues__.nil?
+      ejecutar_despues = @__antes_despues__.despues unless @__antes_despues__.nil?
+      invariantes = @__invariantes__
+      accessors = @__accessors__
+      precondiciones = @__precondiciones__
+      postcondiciones = @__postcondiciones__
+      @__precondiciones__ = []
+      @__postcondiciones__ = []
+
+      return accessors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones
+    end
   end
 
   class AntesDespues
@@ -92,22 +97,6 @@ module Contratos
     def initialize(antes, despues)
       @antes = antes
       @despues = despues
-    end
-  end
-
-  class Invariante
-    attr_accessor :bloque
-
-    def initialize(bloque)
-      @bloque = bloque
-    end
-  end
-
-  class Condition
-    attr_accessor :bloque
-
-    def initialize(bloque)
-      @bloque = Proc.new(&bloque)
     end
   end
 end

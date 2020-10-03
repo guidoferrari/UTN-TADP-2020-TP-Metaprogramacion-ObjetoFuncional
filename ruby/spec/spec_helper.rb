@@ -1,6 +1,6 @@
 require 'rspec'
 
-require_relative '../lib/Objetivo/MiClaseBeforeAndAfter'
-require_relative '../lib/Objetivo/guerreroInvariant'
-require_relative '../lib/Objetivo/OperacionesPrePost'
-require_relative '../lib/Objetivo/PilaCompleto'
+require_relative '../lib/Objetivo/mi_clase_before_and_after'
+require_relative '../lib/Objetivo/guerrero_invariant'
+require_relative '../lib/Objetivo/operaciones_pre_post'
+require_relative '../lib/Objetivo/pila_completo'

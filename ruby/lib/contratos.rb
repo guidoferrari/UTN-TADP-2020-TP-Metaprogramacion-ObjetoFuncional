@@ -28,6 +28,8 @@ module Contratos
         accessors, ejecutar_antes, ejecutar_despues, invariantes, metodo_viejo, postcondiciones, precondiciones = guardar_variables_instancia(method_name)
 
         self.define_method(method_name) do |*args|
+
+          #TODO: Crear ejecutador al principio e ir agregando las cosas a medida que llegan
           ejecutador = Ejecutador.new(metodo_viejo, self, precondiciones, postcondiciones, ejecutar_antes, ejecutar_despues, invariantes, accessors, *args)
 
           ejecutador.ejecutar_precondiciones
@@ -58,15 +60,15 @@ module Contratos
     end
 
     def invariant(&bloque)
-      @__invariantes__ << Proc.new(&bloque)
+      @__invariantes__ << Proc.new(&bloque) if block_given?
     end
 
     def pre(&bloque)
-      @__precondiciones__ << Proc.new(&bloque)
+      @__precondiciones__ << Proc.new(&bloque) if block_given?
     end
 
     def post(&bloque)
-      @__postcondiciones__ << Proc.new(&bloque)
+      @__postcondiciones__ << Proc.new(&bloque) if block_given?
     end
 
     def attr_accessor(*args)

@@ -49,7 +49,7 @@ class Ejecutador
   end
 
   def ejecutar(&bloque)
-    @instancia.instance_exec &bloque if bloque
+    @instancia.instance_exec &bloque if block_given?
   end
 
   def ejecutar_condiciones(tipo_condition, condiciones)

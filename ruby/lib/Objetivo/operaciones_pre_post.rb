@@ -9,6 +9,7 @@ class Operaciones
     resultado = dividendo / divisor
   end
 
+  pre
   def restar(minuendo, sustraendo)
     minuendo - sustraendo
   end

@@ -60,15 +60,15 @@ module Contratos
     end
 
     def invariant(&bloque)
-      @__invariantes__ << Proc.new(&bloque)
+      @__invariantes__ << Proc.new(&bloque) if block_given?
     end
 
     def pre(&bloque)
-      @__precondiciones__ << Proc.new(&bloque)
+      @__precondiciones__ << Proc.new(&bloque) if block_given?
     end
 
     def post(&bloque)
-      @__postcondiciones__ << Proc.new(&bloque)
+      @__postcondiciones__ << Proc.new(&bloque) if block_given?
     end
 
     def attr_accessor(*args)

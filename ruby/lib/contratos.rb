@@ -76,6 +76,11 @@ module Contratos
       super
     end
 
+    def attr_reader(*args)
+      @__accessors__ += args
+      super
+    end
+
     private
 
     def guardar_variables_instancia(method_name)

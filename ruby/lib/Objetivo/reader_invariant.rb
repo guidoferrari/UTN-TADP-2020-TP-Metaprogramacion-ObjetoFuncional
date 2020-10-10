@@ -9,8 +9,8 @@ class Persona
   invariant { !lugarDeNacimiento.nil? }
 
   def initialize(nombre, apellido, lugarDeNacimiento)
-    @marca = nombre
-    @porcentaje = apellido
+    @nombre = nombre
+    @apellido = apellido
     @lugarDeNacimiento = lugarDeNacimiento
   end
 end

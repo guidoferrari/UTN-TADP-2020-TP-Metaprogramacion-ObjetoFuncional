@@ -26,6 +26,16 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     assert(resultado.isFailure)
   }
 
+  it should "Combino dos parser con el <|> y debe devolver failure por string vacío" in {
+    val parser1 = new char('c')
+    val parser2 = new char('h')
+    val parsersCombinados = parser1 <|> parser2
+
+    val resultado = parsersCombinados.parse("")
+
+    assert(resultado.isFailure)
+  }
+
   it should "Combino dos parser con el <> y debe devolver success" in {
     val parser1 = new string("hola")
     val parser2 = new string("mundo")
@@ -43,6 +53,78 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parsersCombinados = parser1 <> parser2
 
     val resultado = parsersCombinados.parse("holachau")
+
+    assert(resultado.isFailure)
+  }
+
+  it should "Combino dos parser con el <> y debe devolver failure por string vacío" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 <> parser2
+
+    val resultado = parsersCombinados.parse("")
+
+    assert(resultado.isFailure)
+  }
+
+  it should "Combino dos parser con el ~> y debe devolver success" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 ~> parser2
+
+    val resultado = parsersCombinados.parse("holamundo")
+
+    assert(resultado.isSuccess)
+    assert(resultado.get == ("mundo", ""))
+  }
+
+  it should "Combino dos parser con el ~> y debe devolver failure" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 ~> parser2
+
+    val resultado = parsersCombinados.parse("holachau")
+
+    assert(resultado.isFailure)
+  }
+
+  it should "Combino dos parser con el ~> y debe devolver failure por string vacío" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 ~> parser2
+
+    val resultado = parsersCombinados.parse("")
+
+    assert(resultado.isFailure)
+  }
+
+  it should "Combino dos parser con el <~ y debe devolver success" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 <~ parser2
+
+    val resultado = parsersCombinados.parse("holamundo")
+
+    assert(resultado.isSuccess)
+    assert(resultado.get == ("hola", ""))
+  }
+
+  it should "Combino dos parser con el <~ y debe devolver failure" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 <~ parser2
+
+    val resultado = parsersCombinados.parse("holachau")
+
+    assert(resultado.isFailure)
+  }
+
+  it should "Combino dos parser con el <~ y debe devolver failure por string vacío" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 <~ parser2
+
+    val resultado = parsersCombinados.parse("")
 
     assert(resultado.isFailure)
   }

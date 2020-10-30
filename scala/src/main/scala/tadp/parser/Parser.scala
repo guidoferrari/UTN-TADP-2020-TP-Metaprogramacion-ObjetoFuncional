@@ -7,15 +7,23 @@ abstract class Parser[T] {
   def parse(string: String): Try[(T, String)]
 
   def <|>(otroParser: Parser[T]): Parser[T] = {
-    new ParseOr[T](this, otroParser)
+    new ParserOr[T](this, otroParser)
   }
 
   def <>(otroParser: Parser[T]): Parser[(T,T)] = {
     new ParserConcat[T](this, otroParser)
   }
+
+  def ~>(otroParser: Parser[T]): Parser[T] = {
+    new ParserRightmost[T](this, otroParser)
+  }
+
+  def <~(otroParser: Parser[T]): Parser[T] = {
+    new ParserLeftmost[T](this, otroParser)
+  }
 }
 
-class ParseOr[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
+class ParserOr[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
   override def parse(string: String): Try[(T, String)] = {
     parser1.parse(string).orElse(parser2.parse(string))
   }
@@ -23,9 +31,33 @@ class ParseOr[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
 
 class ParserConcat[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[(T,T)]{
   override def parse(string: String): Try[((T, T), String)] = {
-    val resultado = parser1.parse(string)
-    val resultado2 = parser2.parse(resultado.get._2)
-    Try(((resultado.get._1, resultado2.get._1), resultado2.get._2))
+    Try({
+        val resultado = parser1.parse(string)
+        val resultado2 = parser2.parse(resultado.get._2)
+        ((resultado.get._1, resultado2.get._1), resultado2.get._2)
+      }
+    )
+  }
+}
+
+class ParserRightmost[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
+  override def parse(string: String): Try[(T, String)] = {
+    Try({
+      val resultado2 = parser2.parse(parser1.parse(string).get._2)
+      (resultado2.get._1, resultado2.get._2)
+      }
+    )
+  }
+}
+
+class ParserLeftmost[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
+  override def parse(string: String): Try[(T, String)] = {
+    Try({
+      val resultado = parser1.parse(string)
+      val resultado2 = parser2.parse(resultado.get._2)
+      (resultado.get._1, resultado2.get._2)
+    }
+    )
   }
 }
 

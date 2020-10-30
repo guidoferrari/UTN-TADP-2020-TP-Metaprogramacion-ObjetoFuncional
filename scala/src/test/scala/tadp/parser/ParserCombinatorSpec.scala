@@ -26,24 +26,24 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     assert(resultado.isFailure)
   }
 
-//  it should "Combino dos parser con el <> y debe devolver success" in {
-//    val parser1 = new string("hola")
-//    val parser2 = new string("mundo")
-//    val parsersCombinados = parser1 <> parser2
-//
-//    val resultado = parsersCombinados.parse("holamundo")
-//
-//    assert(resultado.isSuccess)
-//    assert(resultado.get == ("hola", "mundo"))
-//  }
-//
-//  it should "Combino dos parser con el <> y debe devolver failure" in {
-//    val parser1 = new string("hola")
-//    val parser2 = new string("mundo")
-//    val parsersCombinados = parser1 <> parser2
-//
-//    val resultado = parsersCombinados.parse("holachau")
-//
-//    assert(resultado.isFailure)
-//  }
+  it should "Combino dos parser con el <> y debe devolver success" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 <> parser2
+
+    val resultado = parsersCombinados.parse("holamundo")
+
+    assert(resultado.isSuccess)
+    assert(resultado.get == (("hola", "mundo"), ""))
+  }
+
+  it should "Combino dos parser con el <> y debe devolver failure" in {
+    val parser1 = new string("hola")
+    val parser2 = new string("mundo")
+    val parsersCombinados = parser1 <> parser2
+
+    val resultado = parsersCombinados.parse("holachau")
+
+    assert(resultado.isFailure)
+  }
 }

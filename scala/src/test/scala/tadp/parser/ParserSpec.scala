@@ -45,7 +45,7 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
   it should "Devolverme success si parseo un string que comienza con el string esperado" in {
     val resultado = new string("hola").parse("hola mundo")
     assert(resultado.isSuccess)
-    assert(resultado.get == ("hola"," mundo"))
+    assert(resultado.get. == ("hola"," mundo"))
   }
 
   it should "Devolverme failure si parseo un string que no comienza con el string esperado" in {

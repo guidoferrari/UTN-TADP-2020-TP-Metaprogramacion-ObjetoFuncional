@@ -10,9 +10,9 @@ abstract class Parser[T] {
     new ParseOr[T](this, otroParser)
   }
 
-//  def <>(otroParser: Parser[T]): Parser[T] = {
-//    new ParserConcat[T](this, otroParser)
-//  }
+  def <>(otroParser: Parser[T]): Parser[(T,T)] = {
+    new ParserConcat[T](this, otroParser)
+  }
 }
 
 class ParseOr[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
@@ -21,11 +21,13 @@ class ParseOr[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
   }
 }
 
-//class ParserConcat[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
-//  override def parse(string: String): Try[T] = {
-//    parser1.parse(string).orElse(parser2.parse(string))
-//  }
-//}
+class ParserConcat[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[(T,T)]{
+  override def parse(string: String): Try[((T, T), String)] = {
+    val resultado = parser1.parse(string)
+    val resultado2 = parser2.parse(resultado.get._2)
+    Try(((resultado.get._1, resultado2.get._1), resultado2.get._2))
+  }
+}
 
 class anyChar extends Parser[Char]{
   override def parse(string: String): Try[(Char, String)] = {

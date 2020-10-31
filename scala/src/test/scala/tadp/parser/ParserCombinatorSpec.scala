@@ -15,6 +15,16 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     assert(resultado == ResultadoExitoso('h', "ola"))
   }
 
+  it should "Combino dos parser con el <|> con distintos tipos y debe devolver success" in {
+    val parser1 = new char('h')
+    val parser2 = new integer()
+    val parsersCombinados = parser1 <|> parser2
+
+    val resultado = parsersCombinados("10")
+
+    assert(resultado == ResultadoExitoso(10, ""))
+  }
+
   it should "Combino dos parser con el <|> y debe devolver failure" in {
     val parser1 = new char('c')
     val parser2 = new char('h')
@@ -43,6 +53,16 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val resultado = parsersCombinados("holamundo")
 
     assert(resultado == ResultadoExitoso(("hola", "mundo"), ""))
+  }
+
+  it should "Combino dos parser con el <> y distintos tipos y debe devolver success" in {
+    val parser1 = new char('c')
+    val parser2 = new integer()
+    val parsersCombinados = parser1 <> parser2
+
+    val resultado = parsersCombinados("c123")
+
+    assert(resultado == ResultadoExitoso(('c', 123), ""))
   }
 
   it should "Combino dos parser con el <> y debe devolver failure" in {
@@ -75,6 +95,16 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     assert(resultado == ResultadoExitoso("mundo", ""))
   }
 
+  it should "Combino dos parser con el ~> con dos tipos y debe devolver success" in {
+    val parser1 = new string("hola")
+    val parser2 = new integer()
+    val parsersCombinados = parser1 ~> parser2
+
+    val resultado = parsersCombinados("hola1234")
+
+    assert(resultado == ResultadoExitoso(1234, ""))
+  }
+
   it should "Combino dos parser con el ~> y debe devolver failure" in {
     val parser1 = new string("hola")
     val parser2 = new string("mundo")
@@ -105,6 +135,16 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     assert(resultado == ResultadoExitoso("hola", ""))
   }
 
+  it should "Combino dos parser con el <~ con distintos tipos y debe devolver success" in {
+    val parser1 = new string("hola")
+    val parser2 = new integer()
+    val parsersCombinados = parser1 <~ parser2
+
+    val resultado = parsersCombinados("hola1234")
+
+    assert(resultado == ResultadoExitoso("hola", ""))
+  }
+
   it should "Combino dos parser con el <~ y debe devolver failure" in {
     val parser1 = new string("hola")
     val parser2 = new string("mundo")
@@ -124,29 +164,4 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
 
     assert(resultado == ResultadoFallido(""))
   }
-
-  //  sepBy: toma dos parsers: un parser de contenido y un parser separador,
-  //  parsea 1 o más veces el parser de contenido (similar a la cláusula de kleene+) pero entre cada una aplica el parser separador.
-  //    Ejemplo:
-  //  val numeroDeTelefono = integer.sepBy(char('-'))
-  //  debería funcionar si le paso “4356-1234” pero no si le paso “4356 1234”.
-  // val asd = string("hola").sepBy(char('-'))
-  // asd.parse("hola-hola")
-
-//  it should "Combino dos parser con el sepBy y debe devolver success" in {
-//    val parsersCombinados = integer.sepBy(char('-'))
-//
-//    val resultado = parsersCombinados.parse("4356-1234")
-//
-//    assert(resultado.isSuccess)
-//    assert(resultado.get((4356,'-',1234), ""))
-//  }
-//
-//  it should "Combino dos parser con el sepBy y debe devolver failure" in {
-//    val parsersCombinados = integer.sepBy(char('-'))
-//
-//    val resultado = parsersCombinados.parse("4356 1234")
-//
-//    assert(resultado.isFailure)
-//  }
 }

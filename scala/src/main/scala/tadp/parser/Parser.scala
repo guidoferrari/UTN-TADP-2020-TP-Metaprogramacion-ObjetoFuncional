@@ -1,21 +1,21 @@
 package tadp.parser
 
-trait ParserResult[T]
+trait ParserResult[+T]
 
 case class ResultadoExitoso[T](valorParseado: T, noConsumido: String) extends ParserResult[T]
 case class ResultadoFallido[T](noConsumido: String) extends ParserResult[T]
 
-abstract class Parser[T] extends (String => ParserResult[T]) {
-  def <|>(otroParser: Parser[T]): Parser[T] = new ParserOr[T](this, otroParser)
-  def <>(otroParser: Parser[T]): Parser[(T,T)] = new ParserConcat[T](this, otroParser)
-  def ~>(otroParser: Parser[T]): Parser[T] = new ParserRightmost[T](this, otroParser)
-  def <~(otroParser: Parser[T]): Parser[T] = new ParserLeftmost[T](this, otroParser)
+abstract class Parser[+T] extends (String => ParserResult[T]) {
+  def <|>[V >: T, U <: V](otroParser: Parser[U]): Parser[V] = new ParserOr[T, V, U](this, otroParser)
+  def <>[U](otroParser: Parser[U]): Parser[(T,U)] = new ParserConcat[T, U](this, otroParser)
+  def ~>[U](otroParser: Parser[U]): Parser[U] = new ParserRightmost[T, U](this, otroParser)
+  def <~[U](otroParser: Parser[U]): Parser[T] = new ParserLeftmost[T, U](this, otroParser)
 }
 
 ////////////////////////////////////// ParserCombinators
 
-class ParserOr[T](parser1: Parser[T], parser2: Parser[T]) extends Parser[T]{
-  override def apply(string: String): ParserResult[T] = {
+class ParserOr[T, V >: T, U <: V](parser1: Parser[T], parser2: Parser[U]) extends Parser[V]{
+  override def apply(string: String): ParserResult[V] = {
     parser1(string) match {
       case ResultadoFallido(noConsumido) => parser2(noConsumido)
       case ResultadoExitoso(valorParseado, noConsumido) => ResultadoExitoso(valorParseado, noConsumido)
@@ -23,21 +23,22 @@ class ParserOr[T](parser1: Parser[T], parser2: Parser[T]) extends Parser[T]{
   }
 }
 
-class ParserConcat[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[(T,T)]{
-  override def apply(string: String): ParserResult[(T,T)] = {
+class ParserConcat[T, U](parser1: Parser[T], parser2: Parser[U] ) extends Parser[(T,U)]{
+  override def apply(string: String): ParserResult[(T,U)] = {
     parser1(string) match {
       case ResultadoFallido(noConsumido) => ResultadoFallido(noConsumido)
       case ResultadoExitoso(valorParseado, noConsumido) =>
         parser2(noConsumido) match {
           case ResultadoFallido(_) => ResultadoFallido(string)
-          case ResultadoExitoso(valorParseado2, noConsumido2) => ResultadoExitoso((valorParseado, valorParseado2), noConsumido2)
+          case ResultadoExitoso(valorParseado2, noConsumido2) =>
+            ResultadoExitoso((valorParseado, valorParseado2), noConsumido2)
         }
     }
   }
 }
 
-class ParserRightmost[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
-  override def apply(string: String): ParserResult[T] = {
+class ParserRightmost[T, U](parser1: Parser[T], parser2: Parser[U] ) extends Parser[U]{
+  override def apply(string: String): ParserResult[U] = {
     parser1(string) match {
       case ResultadoFallido(noConsumido) => ResultadoFallido(noConsumido)
       case ResultadoExitoso(_, noConsumido) =>
@@ -49,7 +50,7 @@ class ParserRightmost[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser
   }
 }
 
-class ParserLeftmost[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
+class ParserLeftmost[T, U](parser1: Parser[T], parser2: Parser[U] ) extends Parser[T]{
   override def apply(string: String): ParserResult[T] = {
     parser1(string) match {
       case ResultadoFallido(noConsumido) => ResultadoFallido(noConsumido)

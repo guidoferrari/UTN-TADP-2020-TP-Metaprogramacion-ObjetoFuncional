@@ -11,7 +11,6 @@ case class ResultadoFallido[T](noConsumido: String) extends ParserResult[T]
 //abstract class Parser[T] extends (String => ParserResult[T]) {
 
 abstract class Parser[T] {
-  def parse(string: String): Try[(T, String)]
 
   def apply(string: String): Try[(T, String)]
 
@@ -49,16 +48,12 @@ abstract class Parser[T] {
 }
 
 class anyChar extends Parser[Char]{
-  override def parse(string: String): Try[(Char, String)] = ???
-
   override def apply(string: String): Try[(Char, String)] = {
     Try((string.take(1).charAt(0), string.substring(1)))
   }
 }
 
 class char(char: Char) extends Parser[Char]{
-  override def parse(string: String): Try[(Char, String)] = ???
-
   override def apply(string: String): Try[(Char, String)] = {
     Try(
       string match {
@@ -76,8 +71,6 @@ class char(char: Char) extends Parser[Char]{
 }
 
 class digit extends Parser[Char] {
-  override def parse(string: String): Try[(Char, String)] = ???
-
   override def apply(string: String): Try[(Char, String)] = {
     Try(
       string match {
@@ -109,34 +102,26 @@ class string(stringEsperado: String) extends Parser[String]{
       }
     )
   }
-
-  override def parse(string: String): Try[(String, String)] = ???
 }
 
 class integer extends Parser[Integer] {
   override def apply(string: String): Try[(Integer, String)] = {Try((string.toInt, ""))}
-
-  override def parse(string: String): Try[(Integer, String)] = ???
 }
 
 class double extends Parser[Double] {
   override def apply(string: String): Try[(Double, String)] = {Try((string.toDouble, ""))}
-
-  override def parse(string: String): Try[(Double, String)] = ???
 }
 
 ////////////////////////////////////// Combinators
 
 class ParserOr[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
-  override def parse(string: String): Try[(T, String)] = {
+  override def apply(string: String): Try[(T, String)] = {
     parser1(string).orElse(parser2(string))
   }
-
-  override def apply(string: String): Try[(T, String)] = ???
 }
 
 class ParserConcat[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[(T,T)]{
-  override def parse(string: String): Try[((T, T), String)] = {
+  override def apply(string: String): Try[((T, T), String)] = {
     Try({
       val resultado = parser1(string)
       val resultado2 = parser2(resultado.get._2)
@@ -144,25 +129,20 @@ class ParserConcat[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[(T
     }
     )
   }
-
-  override def apply(string: String): Try[((T, T), String)] = ???
-
 }
 
 class ParserRightmost[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
-  override def parse(string: String): Try[(T, String)] = {
+  override def apply(string: String): Try[(T, String)] = {
     Try({
       val resultado2 = parser2(parser1(string).get._2)
       (resultado2.get._1, resultado2.get._2)
     }
     )
   }
-
-  override def apply(string: String): Try[(T, String)] = ???
 }
 
 class ParserLeftmost[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[T]{
-  override def parse(string: String): Try[(T, String)] = {
+  override def apply(string: String): Try[(T, String)] = {
     Try({
       val resultado = parser1(string)
       val resultado2 = parser2(resultado.get._2)
@@ -170,6 +150,4 @@ class ParserLeftmost[T](parser1: Parser[T], parser2: Parser[T] ) extends Parser[
     }
     )
   }
-
-  override def apply(string: String): Try[(T, String)] = ???
 }

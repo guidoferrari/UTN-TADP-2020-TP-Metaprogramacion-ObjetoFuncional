@@ -10,7 +10,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new char('h')
     val parsersCombinados = parser1 <|> parser2
 
-    val resultado = parsersCombinados.parse("hola")
+    val resultado = parsersCombinados("hola")
 
     assert(resultado.isSuccess)
     assert(resultado.get == ('h', "ola"))
@@ -21,7 +21,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new char('h')
     val parsersCombinados = parser1 <|> parser2
 
-    val resultado = parsersCombinados.parse("adios")
+    val resultado = parsersCombinados("adios")
 
     assert(resultado.isFailure)
   }
@@ -31,7 +31,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new char('h')
     val parsersCombinados = parser1 <|> parser2
 
-    val resultado = parsersCombinados.parse("")
+    val resultado = parsersCombinados("")
 
     assert(resultado.isFailure)
   }
@@ -41,7 +41,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 <> parser2
 
-    val resultado = parsersCombinados.parse("holamundo")
+    val resultado = parsersCombinados("holamundo")
 
     assert(resultado.isSuccess)
     assert(resultado.get == (("hola", "mundo"), ""))
@@ -52,7 +52,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 <> parser2
 
-    val resultado = parsersCombinados.parse("holachau")
+    val resultado = parsersCombinados("holachau")
 
     assert(resultado.isFailure)
   }
@@ -62,7 +62,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 <> parser2
 
-    val resultado = parsersCombinados.parse("")
+    val resultado = parsersCombinados("")
 
     assert(resultado.isFailure)
   }
@@ -72,7 +72,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 ~> parser2
 
-    val resultado = parsersCombinados.parse("holamundo")
+    val resultado = parsersCombinados("holamundo")
 
     assert(resultado.isSuccess)
     assert(resultado.get == ("mundo", ""))
@@ -83,7 +83,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 ~> parser2
 
-    val resultado = parsersCombinados.parse("holachau")
+    val resultado = parsersCombinados("holachau")
 
     assert(resultado.isFailure)
   }
@@ -93,7 +93,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 ~> parser2
 
-    val resultado = parsersCombinados.parse("")
+    val resultado = parsersCombinados("")
 
     assert(resultado.isFailure)
   }
@@ -103,7 +103,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 <~ parser2
 
-    val resultado = parsersCombinados.parse("holamundo")
+    val resultado = parsersCombinados("holamundo")
 
     assert(resultado.isSuccess)
     assert(resultado.get == ("hola", ""))
@@ -114,7 +114,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 <~ parser2
 
-    val resultado = parsersCombinados.parse("holachau")
+    val resultado = parsersCombinados("holachau")
 
     assert(resultado.isFailure)
   }
@@ -124,7 +124,7 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
     val parser2 = new string("mundo")
     val parsersCombinados = parser1 <~ parser2
 
-    val resultado = parsersCombinados.parse("")
+    val resultado = parsersCombinados("")
 
     assert(resultado.isFailure)
   }

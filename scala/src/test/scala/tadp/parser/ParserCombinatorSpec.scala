@@ -128,4 +128,29 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
 
     assert(resultado.isFailure)
   }
+
+  //  sepBy: toma dos parsers: un parser de contenido y un parser separador,
+  //  parsea 1 o más veces el parser de contenido (similar a la cláusula de kleene+) pero entre cada una aplica el parser separador.
+  //    Ejemplo:
+  //  val numeroDeTelefono = integer.sepBy(char('-'))
+  //  debería funcionar si le paso “4356-1234” pero no si le paso “4356 1234”.
+  // val asd = string("hola").sepBy(char('-'))
+  // asd.parse("hola-hola")
+
+//  it should "Combino dos parser con el sepBy y debe devolver success" in {
+//    val parsersCombinados = integer.sepBy(char('-'))
+//
+//    val resultado = parsersCombinados.parse("4356-1234")
+//
+//    assert(resultado.isSuccess)
+//    assert(resultado.get((4356,'-',1234), ""))
+//  }
+//
+//  it should "Combino dos parser con el sepBy y debe devolver failure" in {
+//    val parsersCombinados = integer.sepBy(char('-'))
+//
+//    val resultado = parsersCombinados.parse("4356 1234")
+//
+//    assert(resultado.isFailure)
+//  }
 }

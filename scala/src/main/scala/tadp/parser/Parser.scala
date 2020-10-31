@@ -6,22 +6,10 @@ case class ResultadoExitoso[T](valorParseado: T, noConsumido: String) extends Pa
 case class ResultadoFallido[T](noConsumido: String) extends ParserResult[T]
 
 abstract class Parser[T] extends (String => ParserResult[T]) {
-
-  def <|>(otroParser: Parser[T]): Parser[T] = {
-    new ParserOr[T](this, otroParser)
-  }
-
-  def <>(otroParser: Parser[T]): Parser[(T,T)] = {
-    new ParserConcat[T](this, otroParser)
-  }
-
-  def ~>(otroParser: Parser[T]): Parser[T] = {
-    new ParserRightmost[T](this, otroParser)
-  }
-
-  def <~(otroParser: Parser[T]): Parser[T] = {
-    new ParserLeftmost[T](this, otroParser)
-  }
+  def <|>(otroParser: Parser[T]): Parser[T] = new ParserOr[T](this, otroParser)
+  def <>(otroParser: Parser[T]): Parser[(T,T)] = new ParserConcat[T](this, otroParser)
+  def ~>(otroParser: Parser[T]): Parser[T] = new ParserRightmost[T](this, otroParser)
+  def <~(otroParser: Parser[T]): Parser[T] = new ParserLeftmost[T](this, otroParser)
 }
 
 ////////////////////////////////////// ParserCombinators

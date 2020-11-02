@@ -164,4 +164,20 @@ class ParserCombinatorSpec extends AnyFlatSpec with should.Matchers {
 
     assert(resultado == ResultadoFallido(""))
   }
+
+//    it should "Combino dos parser con el sepBy y debe devolver success" in {
+//      val parsersCombinados = new integer().sepBy(new char('-'))
+//
+//      val resultado = parsersCombinados("4356-1234")
+//
+//      assert(resultado == ResultadoExitoso((4356,1234), ""))
+//    }
+//
+//    it should "Combino dos parser con el sepBy y debe devolver failure" in {
+//      val parsersCombinados = new integer().sepBy(new char('-'))
+//
+//      val resultado = parsersCombinados("4356 1234")
+//
+//      assert(resultado == ResultadoFallido("4356 1234"))
+//    }
 }

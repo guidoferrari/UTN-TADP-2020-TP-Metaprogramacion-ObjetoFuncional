@@ -36,16 +36,9 @@ package object Parser{
 
     def + : Parser[List[T]] = this.*.satisfies(_.nonEmpty)
 
-    def const[U](nuevoValor: U): Parser[U] = map(_ => nuevoValor)
-
     def map[U](f: T => U): Parser[U] = string => for {
       (resultado, resto) <- this(string)
     } yield (f(resultado), resto)
-
-    def optMap[U](none: => U, f: T => U): Parser[U] = opt.map {
-      case Some(value) => f(value)
-      case None => none
-    }
 
     def recuperarConParserException: Parser[T] = this(_).recover { case _ => throw new ParserException }
 

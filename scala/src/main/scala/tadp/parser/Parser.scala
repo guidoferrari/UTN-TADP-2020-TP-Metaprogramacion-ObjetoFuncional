@@ -11,8 +11,8 @@ package object Parser{
     def <|>[R >: T, U <: R](otroParser: Parser[U]): Parser[R] = string => this(string).recoverWith { case _ => otroParser(string) }
 
     def <>[U](otroParser: Parser[U]): Parser[(T, U)] = string => for {
-      (resultParser, restoParser1) <- this(string)
-      (resultOtroParser, restoOtroParser) <- otroParser(restoParser1)
+      (resultParser, restoParser) <- this(string)
+      (resultOtroParser, restoOtroParser) <- otroParser(restoParser)
     } yield ((resultParser, resultOtroParser), restoOtroParser)
 
     def ~>[U](otroParser: Parser[U]): Parser[U] = string => for {
@@ -82,8 +82,6 @@ package object Parser{
       (parserAccum: Parser[String], charParser) => (parserAccum <> charParser)
         .map { case (strAccum, charNuevo) => strAccum + charNuevo }
     }(string)
-
   }
-
   private def exitosoConResultado[T](value: T): Parser[T] = input => Success((value, input))
 }

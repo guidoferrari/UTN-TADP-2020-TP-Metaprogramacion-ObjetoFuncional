@@ -12,3 +12,5 @@ val anyChar: Parser[Char] = {
 
 val boolean = anyChar("hola") == ResultadoExitoso('h', "ola")
 System.out.println("El boolean es " + boolean)
+
+

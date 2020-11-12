@@ -10,6 +10,7 @@ object TADPDrawingApp extends App {
       adapter
         .beginColor(Color.rgb(100, 100, 100))
         .rectangle((200, 200), (400, 400))
+        .rectangle((100,100),(150,150))
         .end()
     }
 }

@@ -56,29 +56,48 @@ import scala.util.Try
   }
  */
 package object PictureParser {
-  type punto = (Int, Int)
+  type punto = (Double, Double)
 
-  trait formaGeometrica
-  case class triangulo(v1: punto, v2: punto, v3: punto) extends formaGeometrica
-  case class rectangulo(v1: punto, v2: punto) extends formaGeometrica
-  case class circulo(v: punto, radio: Int) extends formaGeometrica
+  trait formaGeometrica {
+    def print(adapter: TADPDrawingAdapter): Unit
+  }
 
-  case class PictureParser() extends (String => Unit){
-    def apply(formaDescripta: String): Unit =
-    try {
-      (trianguloParser() <|> rectanguloParser() <|> circuloParser()) (formaDescripta).get match{
-        case (triangulo((x1, y1), (x2, y2), (x3, y3)), resto) => TADPDrawingAdapter.forScreen( adapter => adapter.triangle((x1, y1), (x2, y2), (x3, y3)))
-        case (rectangulo((x1, y1), (x2, y2)), resto) => TADPDrawingAdapter.forScreen( adapter => adapter.rectangle((x1, y1), (x2, y2)))
-        case (circulo((x1, y1), r), resto) => TADPDrawingAdapter.forScreen( adapter => adapter.circle((x1, y1), r))
-        case _ => println("El parser falló")
-      }
-    } catch {
-      case e: Exception => println("El parser falló")
+  case class triangulo(v1: punto, v2: punto, v3: punto) extends formaGeometrica {
+    def print(adapter: TADPDrawingAdapter): Unit = {
+      adapter.triangle(v1, v2, v3)
+    }
+  }
+  case class rectangulo(v1: punto, v2: punto) extends formaGeometrica {
+    def print(adapter: TADPDrawingAdapter): Unit = {
+      adapter.rectangle(v1, v2)
+    }
+  }
+  case class circulo(v: punto, radio: Int) extends formaGeometrica {
+    def print(adapter: TADPDrawingAdapter): Unit = {
+      adapter.circle(v, radio)
+    }
+  }
+  case class grupo(formas: List[formaGeometrica]) extends formaGeometrica {
+    def print(adapter: TADPDrawingAdapter): Unit = {
+      formas.foreach(forma => forma.print(adapter))
     }
   }
 
-  case class trianguloParser() extends Parser[triangulo] {
-    override def apply(input: String): Try[ParserResult[triangulo]] = for {
+  case class PicturePrinter() extends (String => Unit){
+    def apply(formaDescripta: String): Unit = {
+    val imagen = (trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser()) (formaDescripta)
+
+    TADPDrawingAdapter.forScreen( adapter => {
+      imagen.get match {
+        case (formaGeometrica, _) => formaGeometrica.print(adapter)
+        case _ => println("El parser falla")
+      }
+    })
+    }
+  }
+
+  case class trianguloParser() extends Parser[formaGeometrica] {
+    override def apply(input: String): Try[ParserResult[formaGeometrica]] = for {
       (_, resto) <- string("triangulo[")  (input)
       ((x1, y1), resto) <- (integer().sepBy(string(" @ ")) <~ string(", ")) (resto)
       ((x2, y2), resto) <- (integer().sepBy(string(" @ ")) <~ string(", ")) (resto)
@@ -87,8 +106,8 @@ package object PictureParser {
     } yield (triangulo((x1, y1), (x2, y2), (x3, y3)), resto)
   }
 
-  case class rectanguloParser() extends Parser[rectangulo] {
-    override def apply(input: String): Try[ParserResult[rectangulo]] = for {
+  case class rectanguloParser() extends Parser[formaGeometrica] {
+    override def apply(input: String): Try[ParserResult[formaGeometrica]] = for {
       (_, resto) <- string("rectangulo[")  (input)
       ((x1, y1), resto) <- (integer().sepBy(string(" @ ")) <~ string(", ")) (resto)
       ((x2, y2), resto) <- integer().sepBy(string(" @ ")) (resto)
@@ -96,13 +115,22 @@ package object PictureParser {
     } yield (rectangulo((x1, y1),(x2, y2)), resto)
   }
 
-  case class circuloParser() extends Parser[circulo] {
-    override def apply(input: String): Try[ParserResult[circulo]] = for {
+  case class circuloParser() extends Parser[formaGeometrica] {
+    override def apply(input: String): Try[ParserResult[formaGeometrica]] = for {
       (_, resto) <- string("circulo[")  (input)
       ((x1, y1), resto) <- (integer().sepBy(string(" @ ")) <~ string(", ")) (resto)
       (r, resto) <- integer()(resto)
       (_, resto) <- char(']') (resto)
     } yield (circulo((x1, y1), r), resto)
+  }
+
+  case class grupoParser() extends Parser[grupo] {
+    override def apply(input: String): Try[ParserResult[grupo]] = for {
+      (_, resto) <- string("grupo(") (input)
+      (formaGeometrica, resto) <- ((trianguloParser() <|> rectanguloParser() <|> circuloParser()) <~ string(", ")).+ (resto)
+      (formaSinComa, resto) <- (trianguloParser() <|> rectanguloParser() <|> circuloParser()) (resto)
+      (_, resto) <- char(')') (resto)
+    } yield (grupo(formaGeometrica.appended(formaSinComa)), resto)
   }
 }
 

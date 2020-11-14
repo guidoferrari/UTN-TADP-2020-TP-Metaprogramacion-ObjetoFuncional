@@ -64,12 +64,16 @@ package object PictureParser {
   case class circulo(v: punto, radio: Int) extends formaGeometrica
 
   case class PictureParser() extends (String => Unit){
-    def apply(formaDescripta: String): Unit = {
+    def apply(formaDescripta: String): Unit =
+    try {
       (trianguloParser() <|> rectanguloParser() <|> circuloParser()) (formaDescripta).get match{
         case (triangulo((x1, y1), (x2, y2), (x3, y3)), resto) => TADPDrawingAdapter.forScreen( adapter => adapter.triangle((x1, y1), (x2, y2), (x3, y3)))
         case (rectangulo((x1, y1), (x2, y2)), resto) => TADPDrawingAdapter.forScreen( adapter => adapter.rectangle((x1, y1), (x2, y2)))
         case (circulo((x1, y1), r), resto) => TADPDrawingAdapter.forScreen( adapter => adapter.circle((x1, y1), r))
+        case _ => println("El parser falló")
       }
+    } catch {
+      case e: Exception => println("El parser falló")
     }
   }
 

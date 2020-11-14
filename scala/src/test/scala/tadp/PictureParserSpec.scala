@@ -109,4 +109,25 @@ class PictureParserSpec extends AnyFlatSpec with should.Matchers {
 
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
   }
+
+  it should "Aplicar una escala nula debería simplificarse y eliminarse" in {
+    val textoAParsear = "escala[1, 1](circulo[0 @ 5, 10])"
+    val objetoEsperado = circulo((0, 5), 10)
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
+
+  it should "Aplicar una rotacion nula debería simplificarse y eliminarse" in {
+    val textoAParsear = "rotacion[0](rectangulo[100 @ 200, 300 @ 400])"
+    val objetoEsperado = rectangulo((100, 200), (300, 400))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
+
+  it should "Aplicar una traslacion nula debería simplificarse y eliminarse" in {
+    val textoAParsear = "traslacion[0, 0](circulo[0 @ 5, 10])"
+    val objetoEsperado = circulo((0, 5), 10)
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
 }

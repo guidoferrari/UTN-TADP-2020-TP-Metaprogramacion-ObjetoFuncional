@@ -135,50 +135,62 @@ package object PictureParser {
     }
   }
 
-  case class escalaParser() extends Parser[escala] {
-    override def apply(input: String): Try[ParserResult[escala]] = for {
+  case class escalaParser() extends Parser[imprimible] {
+    override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("escala[") (input)
       ((h, v), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (simplificarEscala(escala(h, v, formaGeometrica)), resto)
 
-    private def simplificarEscala(escalaASimplificar: escala): escala = {
+    private def simplificarEscala(escalaASimplificar: escala): imprimible = {
       escalaASimplificar.forma match {
         case escala(h, v, subForma) => escala(h * escalaASimplificar.h, v * escalaASimplificar.v, subForma)
-        case _ => escalaASimplificar
+        case _ =>
+          escalaASimplificar match {
+            case escala(1.0, 1.0, subforma) => subforma
+            case _ => escalaASimplificar
+          }
       }
     }
   }
 
-  case class rotacionParser() extends Parser[rotacion] {
-    override def apply(input: String): Try[ParserResult[rotacion]] = for {
+  case class rotacionParser() extends Parser[imprimible] {
+    override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("rotacion[") (input)
       (grados, resto) <- (double() <~ string("](")) (resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (simplificarRotacion(rotacion(grados, formaGeometrica)), resto)
 
-    private def simplificarRotacion(rotacionASimplificar: rotacion): rotacion = {
+    private def simplificarRotacion(rotacionASimplificar: rotacion): imprimible = {
       rotacionASimplificar.forma match {
         case rotacion(g, subForma) => rotacion(g + rotacionASimplificar.grados, subForma)
-        case _ => rotacionASimplificar
+        case _ =>
+          rotacionASimplificar match {
+            case rotacion(0.0, subforma) => subforma
+            case _ => rotacionASimplificar
+          }
       }
     }
   }
 
-  case class traslacionParser() extends Parser[traslacion] {
-    override def apply(input: String): Try[ParserResult[traslacion]] = for {
+  case class traslacionParser() extends Parser[imprimible] {
+    override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("traslacion[") (input)
       ((x, y), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (simplificarTraslacion(traslacion(x, y, formaGeometrica)), resto)
 
-    private def simplificarTraslacion(traslacionASimplificar: traslacion): traslacion = {
+    private def simplificarTraslacion(traslacionASimplificar: traslacion): imprimible = {
       traslacionASimplificar.forma match {
         case traslacion(x, y, subForma) => traslacion(x + traslacionASimplificar.x, y + traslacionASimplificar.y, subForma)
-        case _ => traslacionASimplificar
+        case _ =>
+          traslacionASimplificar match {
+            case traslacion(0.0, 0.0, subForma) => subForma
+            case _ => traslacionASimplificar
+          }
       }
     }
   }

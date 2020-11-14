@@ -130,4 +130,15 @@ class PictureParserSpec extends AnyFlatSpec with should.Matchers {
 
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
   }
+
+/*  it should "Aplicar una misma transformacion a elementos de un grupo, se simplifica y se aplica al grupo" in {
+    val textoAParsear = "grupo(color[200, 200, 200](rectangulo[100 @ 100, 200 @ 200]), color[200, 200, 200](circulo[100 @ 300, 150]))"
+    val objetoEsperado = color(200, 200, 200,
+      grupo(List(
+        rectangulo((100, 100), (200, 200)),
+        circulo((100, 300), 150)
+      )))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }*/
 }

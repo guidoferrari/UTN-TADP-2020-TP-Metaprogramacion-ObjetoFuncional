@@ -1,7 +1,7 @@
 package tadp
 
 import scalafx.scene.paint.Color
-import tadp.PictureParser.PicturePrinter
+import tadp.PictureParser._
 import tadp.internal._
 import tadp.parser.Parser._
 
@@ -106,18 +106,24 @@ package object PictureParser {
     } yield (circulo((x1, y1), r), resto)
   }
 
-  case class grupoParser() extends Parser[grupo] {
-    override def apply(input: String): Try[ParserResult[grupo]] = for {
+  case class grupoParser() extends Parser[imprimible] {
+    override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("grupo(") (input)
       (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).+ (resto)
       (formaSinComa, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (grupo(formaGeometrica.appended(formaSinComa)), resto)
-  }
+    } yield (simplificarGrupo(grupo(formaGeometrica.appended(formaSinComa))), resto)
 
-  /* TODO SIMPLIFICACION:
-  - Si tenemos una transformación aplicada a todos los hijos de un grupo, eso debería convertirse en una transformación aplicada al grupo.
-   */
+    /* TODO SIMPLIFICACION: Si tenemos una transformación aplicada a todos los hijos de un grupo, eso debería convertirse en una transformación aplicada al grupo. */
+    private def simplificarGrupo(grupoASimplificar: grupo): imprimible = {
+        grupoASimplificar
+    }
+
+//    private def mismoColor(forma: imprimible, r: Int, g: Int, b: Int): Boolean = forma match {
+//      case color(r1, g1, b1, _) => r1 == r && g1 == g && b1 == b
+//      case _ => false
+//    }
+  }
 
   case class colorParser() extends Parser[color] {
     override def apply(input: String): Try[ParserResult[color]] = for {

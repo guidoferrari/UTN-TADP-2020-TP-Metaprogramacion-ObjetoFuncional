@@ -96,9 +96,17 @@ package object PictureParser {
     }
   }
 
+  case class escala(h: Double, v: Double, formas: List[imprimible]) extends imprimible {
+    def print(adapter: TADPDrawingAdapter): Unit = {
+      adapter.beginScale(h, v)
+      formas.foreach(forma => forma.print(adapter))
+      //adapter.end()
+    }
+  }
+
   case class parserGenerico() extends Parser[imprimible] {
     override def apply(input: String): Try[ParserResult[imprimible]] = {
-      (trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser() <|> colorParser()) (input)
+      (trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser() <|> colorParser() <|> escalaParser()) (input)
     }
   }
 
@@ -149,6 +157,16 @@ package object PictureParser {
     } yield (color(r, g, b, formaGeometrica.appended(formaSinComa)), resto)
   }
 
+  case class escalaParser() extends Parser[escala] {
+    override def apply(input: String): Try[ParserResult[escala]] = for {
+      (_, resto) <- string("escala[") (input)
+      ((h, v), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
+      (formaGeometrica, resto) <- (parserGenerico() <~ string(", ")).* (resto)
+      (formaSinComa, resto) <- parserGenerico() (resto)
+      (_, resto) <- char(')') (resto)
+    } yield (escala(h, v, formaGeometrica.appended(formaSinComa)), resto)
+  }
+
   case class PicturePrinter() extends (String => Unit){
     def apply(formaDescripta: String): Unit = {
       val imagen = parserGenerico() (formaDescripta)
@@ -170,5 +188,6 @@ object app extends App {
   // color
   //PicturePrinter()("color[60, 150, 200](grupo(triangulo[200 @ 50, 101 @ 335, 299 @ 335], circulo[200 @ 350, 100]))")
 
-
+  // escala
+  //PicturePrinter()("escala[2.5, 1](rectangulo[0 @ 100, 200 @ 300])")
 }

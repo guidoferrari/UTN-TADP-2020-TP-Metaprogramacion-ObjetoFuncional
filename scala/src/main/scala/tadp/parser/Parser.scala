@@ -1,6 +1,6 @@
 package tadp.parser
 
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 package object Parser{
   final case class ParserException(message: String = "") extends Exception(message)
@@ -74,7 +74,19 @@ package object Parser{
   }
 
   case class double() extends Parser[Double]{
-    override def apply(string: String): Try[ParserResult[Double]] = Try(string.toDouble, "")
+    override def apply(string: String): Try[ParserResult[Double]] =
+      try {
+        val parseado = (integer().sepBy(char('.')) <|> integer())(string).get
+        var resultado: Try[ParserResult[Double]] = null
+        parseado match {
+          case ((entero,decimal), resto) => resultado = Try(new StringBuilder().append(entero).append('.').append(decimal).result().toDouble, resto)
+          case (entero, resto) => resultado = Try(entero.toString.toDouble, resto)
+        }
+        recuperarConParserException
+        resultado
+      } catch {
+        case _ => Try(throw new ParserException)
+      }
   }
 
   case class string(stringBuscado: String) extends Parser[String]{

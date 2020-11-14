@@ -82,10 +82,31 @@ class PictureParserSpec extends AnyFlatSpec with should.Matchers {
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
   }
 
-//  it should "Aplicar un color a otro color debería simplificarse y quedar el de adentro" in {
-//    val textoAParsear = "color[200, 200, 200](color[150, 150, 150](rectangulo[100 @ 100, 200 @ 200]))"
-//    val objetoEsperado = color(150, 150, 150, rectangulo((100, 100), (200, 200)))
-//
-//    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
-//  }
+  it should "Aplicar un color a otro color debería simplificarse y quedar el de adentro" in {
+    val textoAParsear = "color[200, 200, 200](color[150, 150, 150](rectangulo[100 @ 100, 200 @ 200]))"
+    val objetoEsperado = color(150, 150, 150, rectangulo((100, 100), (200, 200)))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
+
+  it should "Aplicar una escala a otra escala debería simplificarse y multiplicar sus factores" in {
+    val textoAParsear = "escala[2, 3](escala[3, 5](circulo[0 @ 5, 10]))"
+    val objetoEsperado = escala(6, 15, circulo((0, 5), 10))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
+
+  it should "Aplicar una rotacion a otra rotacion debería simplificarse y sumar sus grados" in {
+    val textoAParsear = "rotacion[300](rotacion[10](rectangulo[100 @ 200, 300 @ 400]))"
+    val objetoEsperado = rotacion(310, rectangulo((100, 200), (300, 400)))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
+
+  it should "Aplicar una traslacion a otra traslacion debería simplificarse y sumar sus valores" in {
+    val textoAParsear = "traslacion[100, 5](traslacion[20, 10](circulo[0 @ 5, 10]))"
+    val objetoEsperado = traslacion(120, 15, circulo((0, 5), 10))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
 }

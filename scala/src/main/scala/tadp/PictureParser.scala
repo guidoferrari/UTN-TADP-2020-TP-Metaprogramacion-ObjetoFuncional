@@ -116,16 +116,23 @@ package object PictureParser {
   }
 
   /* TODO SIMPLIFICACION:
-    - Crear un simplificador que se ejecute en el apply
-    - Crear un simplificador que se vaya ejecutando en los parseos
+  - Si tenemos una transformación aplicada a todos los hijos de un grupo, eso debería convertirse en una transformación aplicada al grupo.
    */
+
   case class colorParser() extends Parser[color] {
     override def apply(input: String): Try[ParserResult[color]] = for {
       (_, resto) <- string("color[") (input)
       (((r, g), b), resto) <- (((integer() <~ string(", ")) <> (integer() <~ string(", ")) <> integer()) <~ string("](")) (resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (color(r, g, b, formaGeometrica), resto)
+    } yield (simplificarColor(color(r, g, b, formaGeometrica)), resto)
+
+    private def simplificarColor(colorASimplificar: color): color = {
+      colorASimplificar.forma match {
+        case color(r, g, b, subForma) => color(r, g, b, subForma)
+        case _ => colorASimplificar
+      }
+    }
   }
 
   case class escalaParser() extends Parser[escala] {
@@ -134,7 +141,14 @@ package object PictureParser {
       ((h, v), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (escala(h, v, formaGeometrica), resto)
+    } yield (simplificarEscala(escala(h, v, formaGeometrica)), resto)
+
+    private def simplificarEscala(escalaASimplificar: escala): escala = {
+      escalaASimplificar.forma match {
+        case escala(h, v, subForma) => escala(h * escalaASimplificar.h, v * escalaASimplificar.v, subForma)
+        case _ => escalaASimplificar
+      }
+    }
   }
 
   case class rotacionParser() extends Parser[rotacion] {
@@ -143,7 +157,14 @@ package object PictureParser {
       (grados, resto) <- (double() <~ string("](")) (resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (rotacion(grados, formaGeometrica), resto)
+    } yield (simplificarRotacion(rotacion(grados, formaGeometrica)), resto)
+
+    private def simplificarRotacion(rotacionASimplificar: rotacion): rotacion = {
+      rotacionASimplificar.forma match {
+        case rotacion(g, subForma) => rotacion(g + rotacionASimplificar.grados, subForma)
+        case _ => rotacionASimplificar
+      }
+    }
   }
 
   case class traslacionParser() extends Parser[traslacion] {
@@ -152,7 +173,14 @@ package object PictureParser {
       ((x, y), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (traslacion(x, y, formaGeometrica), resto)
+    } yield (simplificarTraslacion(traslacion(x, y, formaGeometrica)), resto)
+
+    private def simplificarTraslacion(traslacionASimplificar: traslacion): traslacion = {
+      traslacionASimplificar.forma match {
+        case traslacion(x, y, subForma) => traslacion(x + traslacionASimplificar.x, y + traslacionASimplificar.y, subForma)
+        case _ => traslacionASimplificar
+      }
+    }
   }
 
   case class PicturePrinter() extends (String => Unit){

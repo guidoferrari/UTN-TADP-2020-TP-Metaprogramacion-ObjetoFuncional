@@ -65,7 +65,7 @@ package object PictureParser {
     }
   }
 
-  case class parserGeneral() extends Parser[imprimible] {
+  case class parserGrafico() extends Parser[imprimible] {
     override def apply(input: String): Try[ParserResult[imprimible]] = {
       (trianguloParser() <|>
         rectanguloParser() <|>
@@ -109,8 +109,8 @@ package object PictureParser {
   case class grupoParser() extends Parser[grupo] {
     override def apply(input: String): Try[ParserResult[grupo]] = for {
       (_, resto) <- string("grupo(") (input)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).+ (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).+ (resto)
+      (formaSinComa, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (grupo(formaGeometrica.appended(formaSinComa)), resto)
   }
@@ -123,8 +123,8 @@ package object PictureParser {
     override def apply(input: String): Try[ParserResult[color]] = for {
       (_, resto) <- string("color[") (input)
       (((r, g), b), resto) <- (((integer() <~ string(", ")) <> (integer() <~ string(", ")) <> integer()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).* (resto)
+      (formaSinComa, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (color(r, g, b, formaGeometrica.appended(formaSinComa)), resto)
   }
@@ -133,8 +133,8 @@ package object PictureParser {
     override def apply(input: String): Try[ParserResult[escala]] = for {
       (_, resto) <- string("escala[") (input)
       ((h, v), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).* (resto)
+      (formaSinComa, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (escala(h, v, formaGeometrica.appended(formaSinComa)), resto)
   }
@@ -143,8 +143,8 @@ package object PictureParser {
     override def apply(input: String): Try[ParserResult[rotacion]] = for {
       (_, resto) <- string("rotacion[") (input)
       (grados, resto) <- (double() <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).* (resto)
+      (formaSinComa, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (rotacion(grados, formaGeometrica.appended(formaSinComa)), resto)
   }
@@ -153,15 +153,15 @@ package object PictureParser {
     override def apply(input: String): Try[ParserResult[traslacion]] = for {
       (_, resto) <- string("traslacion[") (input)
       ((x, y), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).* (resto)
+      (formaSinComa, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (traslacion(x, y, formaGeometrica.appended(formaSinComa)), resto)
   }
 
   case class PicturePrinter() extends (String => Unit){
     def apply(formaDescripta: String): Unit = {
-      val imagen = parserGeneral() (formaDescripta)
+      val imagen = parserGrafico() (formaDescripta)
 
       TADPDrawingAdapter.forScreen( adapter => {
         imagen.get match {

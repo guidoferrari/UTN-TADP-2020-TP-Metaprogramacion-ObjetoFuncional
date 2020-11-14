@@ -7,56 +7,6 @@ import tadp.parser.Parser._
 
 import scala.util.Try
 
-/*
-  triangulo[0 @ 100, 200 @ 300, 150 @ 500]
-  rectangulo[0 @ 100, 200 @ 300]
-  circulo[100 @ 100, 50]
-
-  grupo(
-   triangulo[200 @ 50, 101 @ 335, 299 @ 335],
-   circulo[200 @ 350, 100]
-  )
-
-   grupo(
-    grupo(
-   	 triangulo[250 @ 150, 150 @ 300, 350 @ 300],
-   	 triangulo[150 @ 300, 50 @ 450, 250 @ 450]
-    ),
-    grupo(
-   	 rectangulo[460 @ 90, 470 @ 100],
-   	 rectangulo[450 @ 100, 480 @ 260]
-    )
-  )
-
-  color[60, 150, 200](
-    grupo(
-   	 triangulo[200 @ 50, 101 @ 335, 299 @ 335],
-   	 circulo[200 @ 350, 100]
-    )
-  )
-
-  escala[2.5, 1](
-	rectangulo[0 @ 100, 200 @ 300]
-  )
-
-  rotacion[45](
-	rectangulo[300 @ 0, 500 @ 200]
-  )
-
-  traslacion[200, 50](
-	triangulo[0 @ 100, 200 @ 300, 150 @ 500]
-  )
-*/
-
-/*
-  definir FORMA
-  FORMA => (operacionDeForma , List[Operaciones])
-
-  TADPDrawingAdapter.forScreen { adapter =>
-    forma._2.forEach( o -> adapter.o)
-    adapter.(forma._1)
-  }
- */
 package object PictureParser {
   type punto = (Double, Double)
 
@@ -103,10 +53,32 @@ package object PictureParser {
       //adapter.end()
     }
   }
+  case class rotacion(grados: Double, formas: List[imprimible]) extends imprimible {
+    def print(adapter: TADPDrawingAdapter): Unit = {
+      adapter.beginRotate(grados)
+      formas.foreach(forma => forma.print(adapter))
+      //adapter.end()
+    }
+  }
+
+  case class traslacion(x: Double, y: Double, formas: List[imprimible]) extends imprimible {
+    def print(adapter: TADPDrawingAdapter): Unit = {
+      adapter.beginTranslate(x, y)
+      formas.foreach(forma => forma.print(adapter))
+      //adapter.end()
+    }
+  }
 
   case class parserGenerico() extends Parser[imprimible] {
     override def apply(input: String): Try[ParserResult[imprimible]] = {
-      (trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser() <|> colorParser() <|> escalaParser()) (input)
+      (trianguloParser() <|>
+        rectanguloParser() <|>
+        circuloParser() <|>
+        grupoParser() <|>
+        colorParser() <|>
+        escalaParser() <|>
+        rotacionParser() <|>
+        traslacionParser()) (input)
     }
   }
 
@@ -167,6 +139,26 @@ package object PictureParser {
     } yield (escala(h, v, formaGeometrica.appended(formaSinComa)), resto)
   }
 
+  case class rotacionParser() extends Parser[rotacion] {
+    override def apply(input: String): Try[ParserResult[rotacion]] = for {
+      (_, resto) <- string("rotacion[") (input)
+      (grados, resto) <- (double() <~ string("](")) (resto)
+      (formaGeometrica, resto) <- (parserGenerico() <~ string(", ")).* (resto)
+      (formaSinComa, resto) <- parserGenerico() (resto)
+      (_, resto) <- char(')') (resto)
+    } yield (rotacion(grados, formaGeometrica.appended(formaSinComa)), resto)
+  }
+
+  case class traslacionParser() extends Parser[traslacion] {
+    override def apply(input: String): Try[ParserResult[traslacion]] = for {
+      (_, resto) <- string("traslacion[") (input)
+      ((x, y), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
+      (formaGeometrica, resto) <- (parserGenerico() <~ string(", ")).* (resto)
+      (formaSinComa, resto) <- parserGenerico() (resto)
+      (_, resto) <- char(')') (resto)
+    } yield (traslacion(x, y, formaGeometrica.appended(formaSinComa)), resto)
+  }
+
   case class PicturePrinter() extends (String => Unit){
     def apply(formaDescripta: String): Unit = {
       val imagen = parserGenerico() (formaDescripta)
@@ -190,4 +182,10 @@ object app extends App {
 
   // escala
   //PicturePrinter()("escala[2.5, 1](rectangulo[0 @ 100, 200 @ 300])")
+
+  // rotacion
+  //PicturePrinter()("rotacion[45](rectangulo[300 @ 0, 500 @ 200])")
+
+  // traslacion
+  //PicturePrinter()("traslacion[200, 50](triangulo[0 @ 100, 200 @ 300, 150 @ 500])")
 }

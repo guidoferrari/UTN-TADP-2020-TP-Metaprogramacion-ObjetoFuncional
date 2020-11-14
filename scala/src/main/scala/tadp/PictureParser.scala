@@ -38,30 +38,30 @@ package object PictureParser {
     }
   }
 
-  case class color(r: Int, g: Int, b: Int, formas: List[imprimible]) extends imprimible {
+  case class color(r: Int, g: Int, b: Int, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginColor(Color.rgb(r, g, b))
-      formas.foreach(forma => forma.print(adapter))
+      forma.print(adapter)
     }
   }
 
-  case class escala(h: Double, v: Double, formas: List[imprimible]) extends imprimible {
+  case class escala(h: Double, v: Double, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginScale(h, v)
-      formas.foreach(forma => forma.print(adapter))
+      forma.print(adapter)
     }
   }
-  case class rotacion(grados: Double, formas: List[imprimible]) extends imprimible {
+  case class rotacion(grados: Double, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginRotate(grados)
-      formas.foreach(forma => forma.print(adapter))
+      forma.print(adapter)
     }
   }
 
-  case class traslacion(x: Double, y: Double, formas: List[imprimible]) extends imprimible {
+  case class traslacion(x: Double, y: Double, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginTranslate(x, y)
-      formas.foreach(forma => forma.print(adapter))
+      forma.print(adapter)
     }
   }
 
@@ -123,40 +123,36 @@ package object PictureParser {
     override def apply(input: String): Try[ParserResult[color]] = for {
       (_, resto) <- string("color[") (input)
       (((r, g), b), resto) <- (((integer() <~ string(", ")) <> (integer() <~ string(", ")) <> integer()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGrafico() (resto)
+      (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (color(r, g, b, formaGeometrica.appended(formaSinComa)), resto)
+    } yield (color(r, g, b, formaGeometrica), resto)
   }
 
   case class escalaParser() extends Parser[escala] {
     override def apply(input: String): Try[ParserResult[escala]] = for {
       (_, resto) <- string("escala[") (input)
       ((h, v), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGrafico() (resto)
+      (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (escala(h, v, formaGeometrica.appended(formaSinComa)), resto)
+    } yield (escala(h, v, formaGeometrica), resto)
   }
 
   case class rotacionParser() extends Parser[rotacion] {
     override def apply(input: String): Try[ParserResult[rotacion]] = for {
       (_, resto) <- string("rotacion[") (input)
       (grados, resto) <- (double() <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGrafico() (resto)
+      (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (rotacion(grados, formaGeometrica.appended(formaSinComa)), resto)
+    } yield (rotacion(grados, formaGeometrica), resto)
   }
 
   case class traslacionParser() extends Parser[traslacion] {
     override def apply(input: String): Try[ParserResult[traslacion]] = for {
       (_, resto) <- string("traslacion[") (input)
       ((x, y), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGrafico() (resto)
+      (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (traslacion(x, y, formaGeometrica.appended(formaSinComa)), resto)
+    } yield (traslacion(x, y, formaGeometrica), resto)
   }
 
   case class PicturePrinter() extends (String => Unit){

@@ -42,12 +42,12 @@ class PictureParserSpec extends AnyFlatSpec with should.Matchers {
 
   it should "Aplicar un color debería generarme los objetos correctos" in {
     val textoAParsear = "color[60, 150, 200](grupo(triangulo[200 @ 50, 101 @ 335, 299 @ 335], circulo[200 @ 350, 100]))"
-    val objetoEsperado = color(60, 150, 200, List(
+    val objetoEsperado = color(60, 150, 200,
       grupo(List(
         triangulo((200, 50), (101, 335), (299, 335)),
         circulo((200, 350), 100)
       ))
-    ))
+    )
 
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
   }
@@ -55,9 +55,9 @@ class PictureParserSpec extends AnyFlatSpec with should.Matchers {
   it should "Aplicar una escala debería generarme los objetos correctos" in {
     val textoAParsear = "escala[2.5, 1](rectangulo[0 @ 100, 200 @ 300])"
     val objetoEsperado =
-      escala(2.5, 1, List(
+      escala(2.5, 1,
         rectangulo((0, 100), (200, 300))
-      ))
+      )
 
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
   }
@@ -65,9 +65,9 @@ class PictureParserSpec extends AnyFlatSpec with should.Matchers {
   it should "Aplicar una rotación debería generarme los objetos correctos" in {
     val textoAParsear = "rotacion[45](rectangulo[300 @ 0, 500 @ 200])"
     val objetoEsperado =
-      rotacion(45, List(
+      rotacion(45,
         rectangulo((300, 0), (500, 200))
-      ))
+      )
 
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
   }
@@ -75,10 +75,17 @@ class PictureParserSpec extends AnyFlatSpec with should.Matchers {
   it should "Aplicar una traslación debería generarme los objetos correctos" in {
     val textoAParsear = "traslacion[200, 50](triangulo[0 @ 100, 200 @ 300, 150 @ 500])"
     val objetoEsperado =
-      traslacion(200, 50, List(
+      traslacion(200, 50,
         triangulo((0, 100), (200, 300), (150, 500))
-      ))
+      )
 
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
   }
+
+//  it should "Aplicar un color a otro color debería simplificarse y quedar el de adentro" in {
+//    val textoAParsear = "color[200, 200, 200](color[150, 150, 150](rectangulo[100 @ 100, 200 @ 200]))"
+//    val objetoEsperado = color(150, 150, 150, rectangulo((100, 100), (200, 200)))
+//
+//    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+//  }
 }

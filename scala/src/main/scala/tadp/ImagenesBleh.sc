@@ -61,8 +61,8 @@ case class circuloParser() extends Parser[formaGeometrica] {
 case class grupoParser() extends Parser[grupo] {
   override def apply(input: String): Try[ParserResult[grupo]] = for {
     (_, resto) <- string("grupo(") (input)
-    (formaGeometrica, resto) <- ((trianguloParser() <|> rectanguloParser() <|> circuloParser()) <~ string(", ")).+ (resto)
-    (formaSinComa, resto) <- (trianguloParser() <|> rectanguloParser() <|> circuloParser()) (resto)
+    (formaGeometrica, resto) <- ((trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser()) <~ string(", ")).+ (resto)
+    (formaSinComa, resto) <- (trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser()) (resto)
     (_, resto) <- char(')') (resto)
   } yield (grupo(formaGeometrica.appended(formaSinComa)), resto)
 }
@@ -83,4 +83,5 @@ case class PicturePrinter() extends (String => Unit){
 //PicturePrinter()("triangulo[0 @ 100, 200 @ 300, 150 @ 500]")
 //PicturePrinter()("rectangulo[0 @ 100, 200 @ 300]")
 //PicturePrinter()("circulo[100 @ 100, 50]")
-PicturePrinter()("grupo(triangulo[200 @ 50, 101 @ 335, 299 @ 335], circulo[200 @ 350, 100])")
+//PicturePrinter()("grupo(triangulo[200 @ 50, 101 @ 335, 299 @ 335], circulo[200 @ 350, 100])")
+PicturePrinter()("grupo(grupo(triangulo[250 @ 150, 150 @ 300, 350 @ 300], triangulo[150 @ 300, 50 @ 450, 250 @ 450]), grupo(rectangulo[460 @ 90, 470 @ 100], rectangulo[450 @ 100, 480 @ 260]))")

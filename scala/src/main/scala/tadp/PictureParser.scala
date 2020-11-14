@@ -127,8 +127,8 @@ package object PictureParser {
   case class grupoParser() extends Parser[grupo] {
     override def apply(input: String): Try[ParserResult[grupo]] = for {
       (_, resto) <- string("grupo(") (input)
-      (formaGeometrica, resto) <- ((trianguloParser() <|> rectanguloParser() <|> circuloParser()) <~ string(", ")).+ (resto)
-      (formaSinComa, resto) <- (trianguloParser() <|> rectanguloParser() <|> circuloParser()) (resto)
+      (formaGeometrica, resto) <- ((trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser()) <~ string(", ")).+ (resto)
+      (formaSinComa, resto) <- (trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser()) (resto)
       (_, resto) <- char(')') (resto)
     } yield (grupo(formaGeometrica.appended(formaSinComa)), resto)
   }

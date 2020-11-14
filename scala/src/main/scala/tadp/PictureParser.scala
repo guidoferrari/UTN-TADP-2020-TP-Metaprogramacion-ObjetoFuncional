@@ -115,6 +115,10 @@ package object PictureParser {
     } yield (grupo(formaGeometrica.appended(formaSinComa)), resto)
   }
 
+  /* TODO SIMPLIFICACION:
+    - Crear un simplificador que se ejecute en el apply
+    - Crear un simplificador que se vaya ejecutando en los parseos
+   */
   case class colorParser() extends Parser[color] {
     override def apply(input: String): Try[ParserResult[color]] = for {
       (_, resto) <- string("color[") (input)

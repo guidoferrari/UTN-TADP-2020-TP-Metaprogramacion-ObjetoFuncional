@@ -1,7 +1,7 @@
 package tadp
 
 import scalafx.scene.paint.Color
-import tadp.PictureParser.PicturePrinter
+import tadp.PictureParser._
 import tadp.internal._
 import tadp.parser.Parser._
 
@@ -38,34 +38,34 @@ package object PictureParser {
     }
   }
 
-  case class color(r: Int, g: Int, b: Int, formas: List[imprimible]) extends imprimible {
+  case class color(r: Int, g: Int, b: Int, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginColor(Color.rgb(r, g, b))
-      formas.foreach(forma => forma.print(adapter))
+      forma.print(adapter)
     }
   }
 
-  case class escala(h: Double, v: Double, formas: List[imprimible]) extends imprimible {
+  case class escala(h: Double, v: Double, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginScale(h, v)
-      formas.foreach(forma => forma.print(adapter))
+      forma.print(adapter)
     }
   }
-  case class rotacion(grados: Double, formas: List[imprimible]) extends imprimible {
+  case class rotacion(grados: Double, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginRotate(grados)
-      formas.foreach(forma => forma.print(adapter))
+      forma.print(adapter)
     }
   }
 
-  case class traslacion(x: Double, y: Double, formas: List[imprimible]) extends imprimible {
+  case class traslacion(x: Double, y: Double, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginTranslate(x, y)
-      formas.foreach(forma => forma.print(adapter))
+      forma.print(adapter)
     }
   }
 
-  case class parserGeneral() extends Parser[imprimible] {
+  case class parserGrafico() extends Parser[imprimible] {
     override def apply(input: String): Try[ParserResult[imprimible]] = {
       (trianguloParser() <|>
         rectanguloParser() <|>
@@ -106,62 +106,146 @@ package object PictureParser {
     } yield (circulo((x1, y1), r), resto)
   }
 
-  case class grupoParser() extends Parser[grupo] {
-    override def apply(input: String): Try[ParserResult[grupo]] = for {
+  case class grupoParser() extends Parser[imprimible] {
+    override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("grupo(") (input)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).+ (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- (parserGrafico() <~ string(", ")).+ (resto)
+      (formaSinComa, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (grupo(formaGeometrica.appended(formaSinComa)), resto)
+    } yield (simplificarGrupo(grupo(formaGeometrica.appended(formaSinComa))), resto)
+
+    private def simplificarGrupo(grupoASimplificar: grupo): imprimible = {
+      val primerElemento = grupoASimplificar.formas.last
+      primerElemento match {
+        case color(r, g, b, _) if grupoASimplificar.formas.forall(color => esMismoColor(color, r, g, b)) => color(r, g, b, grupo(obtenerFormasDeColor(grupoASimplificar.formas)))
+        case rotacion(grados, _) if grupoASimplificar.formas.forall(rotacion => esMismaRotacion(rotacion, grados)) => rotacion(grados, grupo(obtenerFormasDeRotacion(grupoASimplificar.formas)))
+        case escala(h, v, _) if grupoASimplificar.formas.forall(escala => esMismaEscala(escala, h, v)) => escala(h, v, grupo(obtenerFormasDeEscala(grupoASimplificar.formas)))
+        case traslacion(x, y, _) if grupoASimplificar.formas.forall(escala => esMismaTraslacion(escala, x, y)) => traslacion(x, y, grupo(obtenerFormasDeTraslacion(grupoASimplificar.formas)))
+        case _ => grupoASimplificar
+      }
+    }
+
+    private def esMismoColor(forma: imprimible, r: Int, g: Int, b: Int): Boolean = forma match {
+      case color(r1, g1, b1, _) => r1 == r && g1 == g && b1 == b
+      case _ => false
+    }
+    private def esMismaRotacion(forma: imprimible, grados: Double): Boolean = forma match {
+      case rotacion(grados1, _) => grados1 == grados
+      case _ => false
+    }
+    private def esMismaEscala(forma: imprimible, h: Double, v: Double): Boolean = forma match {
+      case escala(h1, v1, _) => h1 == h && v1 == v
+      case _ => false
+    }
+    private def esMismaTraslacion(forma: imprimible, x: Double, y: Double): Boolean = forma match {
+      case traslacion(x1, y1, _) => x == x1 && y1 == y
+      case _ => false
+    }
+
+    private def obtenerFormasDeColor(lista: List[imprimible]): List[imprimible] = { lista.map {
+        case color(_, _, _, forma) => forma
+        case otraForma => otraForma
+      }
+    }
+
+    private def obtenerFormasDeRotacion(lista: List[imprimible]): List[imprimible] = { lista.map {
+        case rotacion(_, forma) => forma
+        case otraForma => otraForma
+      }
+    }
+
+    private def obtenerFormasDeEscala(lista: List[imprimible]): List[imprimible] = { lista.map {
+        case escala(_, _, forma) => forma
+        case otraForma => otraForma
+      }
+    }
+
+    private def obtenerFormasDeTraslacion(lista: List[imprimible]): List[imprimible] = { lista.map {
+        case traslacion(_, _, forma) => forma
+        case otraForma => otraForma
+      }
+    }
   }
 
-  /* TODO SIMPLIFICACION:
-    - Crear un simplificador que se ejecute en el apply
-    - Crear un simplificador que se vaya ejecutando en los parseos
-   */
   case class colorParser() extends Parser[color] {
     override def apply(input: String): Try[ParserResult[color]] = for {
       (_, resto) <- string("color[") (input)
       (((r, g), b), resto) <- (((integer() <~ string(", ")) <> (integer() <~ string(", ")) <> integer()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (color(r, g, b, formaGeometrica.appended(formaSinComa)), resto)
+    } yield (simplificarColor(color(r, g, b, formaGeometrica)), resto)
+
+    private def simplificarColor(colorASimplificar: color): color = {
+      colorASimplificar.forma match {
+        case color(r, g, b, subForma) => color(r, g, b, subForma)
+        case _ => colorASimplificar
+      }
+    }
   }
 
-  case class escalaParser() extends Parser[escala] {
-    override def apply(input: String): Try[ParserResult[escala]] = for {
+  case class escalaParser() extends Parser[imprimible] {
+    override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("escala[") (input)
       ((h, v), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (escala(h, v, formaGeometrica.appended(formaSinComa)), resto)
+    } yield (simplificarEscala(escala(h, v, formaGeometrica)), resto)
+
+    private def simplificarEscala(escalaASimplificar: escala): imprimible = {
+      escalaASimplificar.forma match {
+        case escala(h, v, subForma) => escala(h * escalaASimplificar.h, v * escalaASimplificar.v, subForma)
+        case _ =>
+          escalaASimplificar match {
+            case escala(1.0, 1.0, subforma) => subforma
+            case _ => escalaASimplificar
+          }
+      }
+    }
   }
 
-  case class rotacionParser() extends Parser[rotacion] {
-    override def apply(input: String): Try[ParserResult[rotacion]] = for {
+  case class rotacionParser() extends Parser[imprimible] {
+    override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("rotacion[") (input)
       (grados, resto) <- (double() <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (rotacion(grados, formaGeometrica.appended(formaSinComa)), resto)
+    } yield (simplificarRotacion(rotacion(grados, formaGeometrica)), resto)
+
+    private def simplificarRotacion(rotacionASimplificar: rotacion): imprimible = {
+      rotacionASimplificar.forma match {
+        case rotacion(g, subForma) => rotacion(g + rotacionASimplificar.grados, subForma)
+        case _ =>
+          rotacionASimplificar match {
+            case rotacion(0.0, subforma) => subforma
+            case _ => rotacionASimplificar
+          }
+      }
+    }
   }
 
-  case class traslacionParser() extends Parser[traslacion] {
-    override def apply(input: String): Try[ParserResult[traslacion]] = for {
+  case class traslacionParser() extends Parser[imprimible] {
+    override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("traslacion[") (input)
       ((x, y), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
-      (formaGeometrica, resto) <- (parserGeneral() <~ string(", ")).* (resto)
-      (formaSinComa, resto) <- parserGeneral() (resto)
+      (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
-    } yield (traslacion(x, y, formaGeometrica.appended(formaSinComa)), resto)
+    } yield (simplificarTraslacion(traslacion(x, y, formaGeometrica)), resto)
+
+    private def simplificarTraslacion(traslacionASimplificar: traslacion): imprimible = {
+      traslacionASimplificar.forma match {
+        case traslacion(x, y, subForma) => traslacion(x + traslacionASimplificar.x, y + traslacionASimplificar.y, subForma)
+        case _ =>
+          traslacionASimplificar match {
+            case traslacion(0.0, 0.0, subForma) => subForma
+            case _ => traslacionASimplificar
+          }
+      }
+    }
   }
 
   case class PicturePrinter() extends (String => Unit){
     def apply(formaDescripta: String): Unit = {
-      val imagen = parserGeneral() (formaDescripta)
+      val imagen = parserGrafico() (formaDescripta)
 
       TADPDrawingAdapter.forScreen( adapter => {
         imagen.get match {

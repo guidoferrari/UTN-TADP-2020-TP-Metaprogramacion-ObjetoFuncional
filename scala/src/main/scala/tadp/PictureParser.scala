@@ -38,7 +38,12 @@ package object PictureParser {
     }
   }
 
-  case class color(r: Int, g: Int, b: Int, forma: imprimible) extends imprimible {
+  trait transformacion extends imprimible {
+    def equals(forma: imprimible): Boolean
+    def copy(grupoEmbebido: imprimible): imprimible
+  }
+
+  case class color(r: Int, g: Int, b: Int, forma: imprimible) extends transformacion {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginColor(Color.rgb(r, g, b))
       forma.print(adapter)
@@ -48,9 +53,11 @@ package object PictureParser {
       case color(r, g, b, _) => this.r == r && this.g == g && this.b == b
       case _ => false
     }
+
+    def copy(grupoEmbebido: imprimible): color = color(r, g, b, grupoEmbebido)
   }
 
-  case class escala(h: Double, v: Double, forma: imprimible) extends imprimible {
+  case class escala(h: Double, v: Double, forma: imprimible) extends transformacion {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginScale(h, v)
       forma.print(adapter)
@@ -60,9 +67,11 @@ package object PictureParser {
       case escala(h, v, _) => this.h == h && this.v == v
       case _ => false
     }
+
+    def copy(grupoEmbebido: imprimible): escala = escala(h, v, grupoEmbebido)
   }
 
-  case class rotacion(grados: Double, forma: imprimible) extends imprimible {
+  case class rotacion(grados: Double, forma: imprimible) extends transformacion {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginRotate(grados)
       forma.print(adapter)
@@ -72,9 +81,11 @@ package object PictureParser {
       case rotacion(grados, _) => this.grados == grados
       case _ => false
     }
+
+    def copy(grupoEmbebido: imprimible): rotacion = rotacion(grados, grupoEmbebido)
   }
 
-  case class traslacion(x: Double, y: Double, forma: imprimible) extends imprimible {
+  case class traslacion(x: Double, y: Double, forma: imprimible) extends transformacion {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginTranslate(x, y)
       forma.print(adapter)
@@ -84,6 +95,8 @@ package object PictureParser {
       case traslacion(x, y, _) => this.x == x && this.y == y
       case _ => false
     }
+
+    def copy(grupoEmbebido: imprimible): traslacion = traslacion(x, y, grupoEmbebido)
   }
 
   case class parserGrafico() extends Parser[imprimible] {
@@ -138,10 +151,8 @@ package object PictureParser {
     private def simplificarGrupo(grupoASimplificar: grupo): imprimible = {
       val primerElemento = grupoASimplificar.formas.last
       primerElemento match {
-        case forma@color(_,_,_,_) if grupoASimplificar.formas.forall(f => forma.equals(f)) => forma.copy(forma = grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
-        case forma@rotacion(_,_) if grupoASimplificar.formas.forall(f => forma.equals(f)) => forma.copy(forma = grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
-        case forma@escala(_,_,_) if grupoASimplificar.formas.forall(f => forma.equals(f)) => forma.copy(forma = grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
-        case forma@traslacion(_,_,_) if grupoASimplificar.formas.forall(f => forma.equals(f)) => forma.copy(forma = grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
+        case t: transformacion if grupoASimplificar.formas.forall(f => t.equals(f)) =>
+          t.copy(grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
         case _ => grupoASimplificar
       }
     }

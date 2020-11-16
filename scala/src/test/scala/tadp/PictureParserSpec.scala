@@ -131,14 +131,51 @@ class PictureParserSpec extends AnyFlatSpec with should.Matchers {
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
   }
 
-/*  it should "Aplicar una misma transformacion a elementos de un grupo, se simplifica y se aplica al grupo" in {
+  it should "Aplicar una misma transformacion de color a elementos de un grupo, se simplifica y se aplica al grupo" in {
     val textoAParsear = "grupo(color[200, 200, 200](rectangulo[100 @ 100, 200 @ 200]), color[200, 200, 200](circulo[100 @ 300, 150]))"
-    val objetoEsperado = color(200, 200, 200,
-      grupo(List(
-        rectangulo((100, 100), (200, 200)),
-        circulo((100, 300), 150)
-      )))
+    val objetoEsperado =
+      color(200, 200, 200,
+        grupo(List(
+          rectangulo((100, 100), (200, 200)),
+          circulo((100, 300), 150)
+        )))
 
     assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
-  }*/
+  }
+
+  it should "Aplicar una misma transformacion de rotación a elementos de un grupo, se simplifica y se aplica al grupo" in {
+    val textoAParsear = "grupo(rotacion[200](rectangulo[100 @ 100, 200 @ 200]), rotacion[200](circulo[100 @ 300, 150]))"
+    val objetoEsperado =
+      rotacion(200,
+        grupo(List(
+          rectangulo((100, 100), (200, 200)),
+          circulo((100, 300), 150)
+        )))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
+
+  it should "Aplicar una misma transformacion de escala a elementos de un grupo, se simplifica y se aplica al grupo" in {
+    val textoAParsear = "grupo(escala[200, 100](rectangulo[100 @ 100, 200 @ 200]), escala[200, 100](circulo[100 @ 300, 150]))"
+    val objetoEsperado =
+      escala(200, 100,
+        grupo(List(
+          rectangulo((100, 100), (200, 200)),
+          circulo((100, 300), 150)
+        )))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
+
+  it should "Aplicar una misma transformacion de traslacion a elementos de un grupo, se simplifica y se aplica al grupo" in {
+    val textoAParsear = "grupo(traslacion[200, 100](rectangulo[100 @ 100, 200 @ 200]), traslacion[200, 100](circulo[100 @ 300, 150]))"
+    val objetoEsperado =
+      traslacion(200, 100,
+        grupo(List(
+          rectangulo((100, 100), (200, 200)),
+          circulo((100, 300), 150)
+        )))
+
+    assert(parserGrafico()(textoAParsear).get == (objetoEsperado, ""))
+  }
 }

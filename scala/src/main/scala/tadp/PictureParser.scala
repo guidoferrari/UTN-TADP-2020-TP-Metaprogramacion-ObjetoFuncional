@@ -114,15 +114,57 @@ package object PictureParser {
       (_, resto) <- char(')') (resto)
     } yield (simplificarGrupo(grupo(formaGeometrica.appended(formaSinComa))), resto)
 
-    /* TODO SIMPLIFICACION: Si tenemos una transformación aplicada a todos los hijos de un grupo, eso debería convertirse en una transformación aplicada al grupo. */
     private def simplificarGrupo(grupoASimplificar: grupo): imprimible = {
-        grupoASimplificar
+      val primerElemento = grupoASimplificar.formas.last
+      primerElemento match {
+        case color(r, g, b, _) if grupoASimplificar.formas.forall(color => esMismoColor(color, r, g, b)) => color(r, g, b, grupo(obtenerFormasDeColor(grupoASimplificar.formas)))
+        case rotacion(grados, _) if grupoASimplificar.formas.forall(rotacion => esMismaRotacion(rotacion, grados)) => rotacion(grados, grupo(obtenerFormasDeRotacion(grupoASimplificar.formas)))
+        case escala(h, v, _) if grupoASimplificar.formas.forall(escala => esMismaEscala(escala, h, v)) => escala(h, v, grupo(obtenerFormasDeEscala(grupoASimplificar.formas)))
+        case traslacion(x, y, _) if grupoASimplificar.formas.forall(escala => esMismaTraslacion(escala, x, y)) => traslacion(x, y, grupo(obtenerFormasDeTraslacion(grupoASimplificar.formas)))
+        case _ => grupoASimplificar
+      }
     }
 
-//    private def mismoColor(forma: imprimible, r: Int, g: Int, b: Int): Boolean = forma match {
-//      case color(r1, g1, b1, _) => r1 == r && g1 == g && b1 == b
-//      case _ => false
-//    }
+    private def esMismoColor(forma: imprimible, r: Int, g: Int, b: Int): Boolean = forma match {
+      case color(r1, g1, b1, _) => r1 == r && g1 == g && b1 == b
+      case _ => false
+    }
+    private def esMismaRotacion(forma: imprimible, grados: Double): Boolean = forma match {
+      case rotacion(grados1, _) => grados1 == grados
+      case _ => false
+    }
+    private def esMismaEscala(forma: imprimible, h: Double, v: Double): Boolean = forma match {
+      case escala(h1, v1, _) => h1 == h && v1 == v
+      case _ => false
+    }
+    private def esMismaTraslacion(forma: imprimible, x: Double, y: Double): Boolean = forma match {
+      case traslacion(x1, y1, _) => x == x1 && y1 == y
+      case _ => false
+    }
+
+    private def obtenerFormasDeColor(lista: List[imprimible]): List[imprimible] = { lista.map {
+        case color(_, _, _, forma) => forma
+        case otraForma => otraForma
+      }
+    }
+
+    private def obtenerFormasDeRotacion(lista: List[imprimible]): List[imprimible] = { lista.map {
+        case rotacion(_, forma) => forma
+        case otraForma => otraForma
+      }
+    }
+
+    private def obtenerFormasDeEscala(lista: List[imprimible]): List[imprimible] = { lista.map {
+        case escala(_, _, forma) => forma
+        case otraForma => otraForma
+      }
+    }
+
+    private def obtenerFormasDeTraslacion(lista: List[imprimible]): List[imprimible] = { lista.map {
+        case traslacion(_, _, forma) => forma
+        case otraForma => otraForma
+      }
+    }
   }
 
   case class colorParser() extends Parser[color] {

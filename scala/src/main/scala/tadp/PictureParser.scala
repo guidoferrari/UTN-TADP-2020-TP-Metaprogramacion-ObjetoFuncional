@@ -40,7 +40,7 @@ package object PictureParser {
 
   trait transformacion extends imprimible {
     def equals(forma: imprimible): Boolean
-    def copy(grupoEmbebido: imprimible): imprimible
+    def copyConGrupo(grupoEmbebido: imprimible): imprimible
   }
 
   case class color(r: Int, g: Int, b: Int, forma: imprimible) extends transformacion {
@@ -54,7 +54,7 @@ package object PictureParser {
       case _ => false
     }
 
-    def copy(grupoEmbebido: imprimible): color = color(r, g, b, grupoEmbebido)
+    def copyConGrupo(grupoEmbebido: imprimible): color = color(r, g, b, grupoEmbebido)
   }
 
   case class escala(h: Double, v: Double, forma: imprimible) extends transformacion {
@@ -68,7 +68,7 @@ package object PictureParser {
       case _ => false
     }
 
-    def copy(grupoEmbebido: imprimible): escala = escala(h, v, grupoEmbebido)
+    def copyConGrupo(grupoEmbebido: imprimible): escala = escala(h, v, grupoEmbebido)
   }
 
   case class rotacion(grados: Double, forma: imprimible) extends transformacion {
@@ -82,7 +82,7 @@ package object PictureParser {
       case _ => false
     }
 
-    def copy(grupoEmbebido: imprimible): rotacion = rotacion(grados, grupoEmbebido)
+    def copyConGrupo(grupoEmbebido: imprimible): rotacion = rotacion(grados, grupoEmbebido)
   }
 
   case class traslacion(x: Double, y: Double, forma: imprimible) extends transformacion {
@@ -96,7 +96,7 @@ package object PictureParser {
       case _ => false
     }
 
-    def copy(grupoEmbebido: imprimible): traslacion = traslacion(x, y, grupoEmbebido)
+    def copyConGrupo(grupoEmbebido: imprimible): traslacion = traslacion(x, y, grupoEmbebido)
   }
 
   case class parserGrafico() extends Parser[imprimible] {
@@ -152,7 +152,7 @@ package object PictureParser {
       val primerElemento = grupoASimplificar.formas.last
       primerElemento match {
         case t: transformacion if grupoASimplificar.formas.forall(f => t.equals(f)) =>
-          t.copy(grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
+          t.copyConGrupo(grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
         case _ => grupoASimplificar
       }
     }

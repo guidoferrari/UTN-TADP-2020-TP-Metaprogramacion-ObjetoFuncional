@@ -43,6 +43,11 @@ package object PictureParser {
       adapter.beginColor(Color.rgb(r, g, b))
       forma.print(adapter)
     }
+
+    def equals(forma: imprimible): Boolean = forma match {
+      case color(r, g, b, _) => this.r == r && this.g == g && this.b == b
+      case _ => false
+    }
   }
 
   case class escala(h: Double, v: Double, forma: imprimible) extends imprimible {
@@ -50,11 +55,22 @@ package object PictureParser {
       adapter.beginScale(h, v)
       forma.print(adapter)
     }
+
+    def equals(forma: imprimible): Boolean = forma match {
+      case escala(h, v, _) => this.h == h && this.v == v
+      case _ => false
+    }
   }
+
   case class rotacion(grados: Double, forma: imprimible) extends imprimible {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginRotate(grados)
       forma.print(adapter)
+    }
+
+    def equals(forma: imprimible): Boolean = forma match {
+      case rotacion(grados, _) => this.grados == grados
+      case _ => false
     }
   }
 
@@ -62,6 +78,11 @@ package object PictureParser {
     def print(adapter: TADPDrawingAdapter): Unit = {
       adapter.beginTranslate(x, y)
       forma.print(adapter)
+    }
+
+    def equals(forma: imprimible): Boolean = forma match {
+      case traslacion(x, y, _) => this.x == x && this.y == y
+      case _ => false
     }
   }
 
@@ -117,50 +138,18 @@ package object PictureParser {
     private def simplificarGrupo(grupoASimplificar: grupo): imprimible = {
       val primerElemento = grupoASimplificar.formas.last
       primerElemento match {
-        case color(r, g, b, _) if grupoASimplificar.formas.forall(color => esMismoColor(color, r, g, b)) => color(r, g, b, grupo(obtenerFormasDeColor(grupoASimplificar.formas)))
-        case rotacion(grados, _) if grupoASimplificar.formas.forall(rotacion => esMismaRotacion(rotacion, grados)) => rotacion(grados, grupo(obtenerFormasDeRotacion(grupoASimplificar.formas)))
-        case escala(h, v, _) if grupoASimplificar.formas.forall(escala => esMismaEscala(escala, h, v)) => escala(h, v, grupo(obtenerFormasDeEscala(grupoASimplificar.formas)))
-        case traslacion(x, y, _) if grupoASimplificar.formas.forall(escala => esMismaTraslacion(escala, x, y)) => traslacion(x, y, grupo(obtenerFormasDeTraslacion(grupoASimplificar.formas)))
+        case forma@color(_,_,_,_) if grupoASimplificar.formas.forall(f => forma.equals(f)) => forma.copy(forma = grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
+        case forma@rotacion(_,_) if grupoASimplificar.formas.forall(f => forma.equals(f)) => forma.copy(forma = grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
+        case forma@escala(_,_,_) if grupoASimplificar.formas.forall(f => forma.equals(f)) => forma.copy(forma = grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
+        case forma@traslacion(_,_,_) if grupoASimplificar.formas.forall(f => forma.equals(f)) => forma.copy(forma = grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
         case _ => grupoASimplificar
       }
     }
 
-    private def esMismoColor(forma: imprimible, r: Int, g: Int, b: Int): Boolean = forma match {
-      case color(r1, g1, b1, _) => r1 == r && g1 == g && b1 == b
-      case _ => false
-    }
-    private def esMismaRotacion(forma: imprimible, grados: Double): Boolean = forma match {
-      case rotacion(grados1, _) => grados1 == grados
-      case _ => false
-    }
-    private def esMismaEscala(forma: imprimible, h: Double, v: Double): Boolean = forma match {
-      case escala(h1, v1, _) => h1 == h && v1 == v
-      case _ => false
-    }
-    private def esMismaTraslacion(forma: imprimible, x: Double, y: Double): Boolean = forma match {
-      case traslacion(x1, y1, _) => x == x1 && y1 == y
-      case _ => false
-    }
-
-    private def obtenerFormasDeColor(lista: List[imprimible]): List[imprimible] = { lista.map {
+    private def obtenerFormasDeTransformacion(lista: List[imprimible]): List[imprimible] = { lista.map {
         case color(_, _, _, forma) => forma
-        case otraForma => otraForma
-      }
-    }
-
-    private def obtenerFormasDeRotacion(lista: List[imprimible]): List[imprimible] = { lista.map {
         case rotacion(_, forma) => forma
-        case otraForma => otraForma
-      }
-    }
-
-    private def obtenerFormasDeEscala(lista: List[imprimible]): List[imprimible] = { lista.map {
         case escala(_, _, forma) => forma
-        case otraForma => otraForma
-      }
-    }
-
-    private def obtenerFormasDeTraslacion(lista: List[imprimible]): List[imprimible] = { lista.map {
         case traslacion(_, _, forma) => forma
         case otraForma => otraForma
       }

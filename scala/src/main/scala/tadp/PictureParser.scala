@@ -186,7 +186,7 @@ package object PictureParser {
   case class escalaParser() extends Parser[imprimible] {
     override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("escala[") (input)
-      ((h, v), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
+      ((h, v), resto) <- variablesEscalaTraslacion(resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (simplificarEscala(escala(h, v, formaGeometrica)), resto)
@@ -226,7 +226,7 @@ package object PictureParser {
   case class traslacionParser() extends Parser[imprimible] {
     override def apply(input: String): Try[ParserResult[imprimible]] = for {
       (_, resto) <- string("traslacion[") (input)
-      ((x, y), resto) <- (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
+      ((x, y), resto) <- variablesEscalaTraslacion(resto)
       (formaGeometrica, resto) <- parserGrafico() (resto)
       (_, resto) <- char(')') (resto)
     } yield (simplificarTraslacion(traslacion(x, y, formaGeometrica)), resto)
@@ -241,6 +241,10 @@ package object PictureParser {
           }
       }
     }
+  }
+
+  def variablesEscalaTraslacion(resto: String) = {
+    (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
   }
 
   case class PicturePrinter() extends (String => Unit){

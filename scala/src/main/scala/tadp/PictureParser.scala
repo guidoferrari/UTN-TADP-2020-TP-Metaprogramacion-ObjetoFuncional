@@ -243,7 +243,7 @@ package object PictureParser {
     }
   }
 
-  def variablesEscalaTraslacion(resto: String) = {
+  def variablesEscalaTraslacion(resto: String): Try[((Double, Double), String)] = {
     (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
   }
 

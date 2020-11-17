@@ -101,14 +101,8 @@ package object PictureParser {
 
   case class parserGrafico() extends Parser[imprimible] {
     override def apply(input: String): Try[ParserResult[imprimible]] = {
-      (trianguloParser() <|>
-        rectanguloParser() <|>
-        circuloParser() <|>
-        grupoParser() <|>
-        colorParser() <|>
-        escalaParser() <|>
-        rotacionParser() <|>
-        traslacionParser()) (input)
+      (trianguloParser() <|> rectanguloParser() <|> circuloParser() <|> grupoParser()
+        <|> colorParser() <|> escalaParser() <|> rotacionParser() <|> traslacionParser()) (input)
     }
   }
 
@@ -149,8 +143,7 @@ package object PictureParser {
     } yield (simplificarGrupo(grupo(formaGeometrica.appended(formaSinComa))), resto)
 
     private def simplificarGrupo(grupoASimplificar: grupo): imprimible = {
-      val primerElemento = grupoASimplificar.formas.last
-      primerElemento match {
+      grupoASimplificar.formas.last match {
         case t: transformacion if grupoASimplificar.formas.forall(f => t.equals(f)) =>
           t.copyConGrupo(grupo(obtenerFormasDeTransformacion(grupoASimplificar.formas)))
         case _ => grupoASimplificar
@@ -175,8 +168,7 @@ package object PictureParser {
       (_, resto) <- char(')') (resto)
     } yield (simplificarColor(color(r, g, b, formaGeometrica)), resto)
 
-    private def simplificarColor(colorASimplificar: color): color = {
-      colorASimplificar.forma match {
+    private def simplificarColor(colorASimplificar: color): color = { colorASimplificar.forma match {
         case color(r, g, b, subForma) => color(r, g, b, subForma)
         case _ => colorASimplificar
       }
@@ -194,8 +186,7 @@ package object PictureParser {
     private def simplificarEscala(escalaASimplificar: escala): imprimible = {
       escalaASimplificar.forma match {
         case escala(h, v, subForma) => escala(h * escalaASimplificar.h, v * escalaASimplificar.v, subForma)
-        case _ =>
-          escalaASimplificar match {
+        case _ => escalaASimplificar match {
             case escala(1.0, 1.0, subforma) => subforma
             case _ => escalaASimplificar
           }
@@ -234,8 +225,7 @@ package object PictureParser {
     private def simplificarTraslacion(traslacionASimplificar: traslacion): imprimible = {
       traslacionASimplificar.forma match {
         case traslacion(x, y, subForma) => traslacion(x + traslacionASimplificar.x, y + traslacionASimplificar.y, subForma)
-        case _ =>
-          traslacionASimplificar match {
+        case _ => traslacionASimplificar match {
             case traslacion(0.0, 0.0, subForma) => subForma
             case _ => traslacionASimplificar
           }
@@ -249,11 +239,9 @@ package object PictureParser {
 
   case class PicturePrinter() extends (String => Unit){
     def apply(formaDescripta: String): Unit = {
-      val imagen = parserGrafico() (formaDescripta)
-
       TADPDrawingAdapter.forScreen( adapter => {
-        imagen.get match {
-          case (formaGeometrica, _) => formaGeometrica.print(adapter)
+        parserGrafico() (formaDescripta).get match {
+          case (formas, _) => formas.print(adapter)
           case _ => println("El parser falla")
         }
       })
@@ -263,7 +251,7 @@ package object PictureParser {
 
 object app extends App {
   // grupo anidado
-  //PicturePrinter()("grupo(grupo(triangulo[250 @ 150, 150 @ 300, 350 @ 300], triangulo[150 @ 300, 50 @ 450, 250 @ 450]), grupo(rectangulo[460 @ 90, 470 @ 100], rectangulo[450 @ 100, 480 @ 260]))")
+  PicturePrinter()("grupo(grupo(triangulo[250 @ 150, 150 @ 300, 350 @ 300], triangulo[150 @ 300, 50 @ 450, 250 @ 450]), grupo(rectangulo[460 @ 90, 470 @ 100], rectangulo[450 @ 100, 480 @ 260]))")
 
   // color
   //PicturePrinter()("color[60, 150, 200](grupo(triangulo[200 @ 50, 101 @ 335, 299 @ 335], circulo[200 @ 350, 100]))")

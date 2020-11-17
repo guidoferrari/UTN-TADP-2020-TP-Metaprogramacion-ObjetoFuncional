@@ -150,14 +150,13 @@ package object PictureParser {
       }
     }
 
-    private def obtenerFormasDeTransformacion(lista: List[imprimible]): List[imprimible] = { lista.map {
+    private def obtenerFormasDeTransformacion(lista: List[imprimible]): List[imprimible] = lista.map {
         case color(_, _, _, forma) => forma
         case rotacion(_, forma) => forma
         case escala(_, _, forma) => forma
         case traslacion(_, _, forma) => forma
         case otraForma => otraForma
       }
-    }
   }
 
   case class colorParser() extends Parser[color] {
@@ -168,11 +167,10 @@ package object PictureParser {
       (_, resto) <- char(')') (resto)
     } yield (simplificarColor(color(r, g, b, formaGeometrica)), resto)
 
-    private def simplificarColor(colorASimplificar: color): color = { colorASimplificar.forma match {
+    private def simplificarColor(colorASimplificar: color): color = colorASimplificar.forma match {
         case color(r, g, b, subForma) => color(r, g, b, subForma)
         case _ => colorASimplificar
       }
-    }
   }
 
   case class escalaParser() extends Parser[imprimible] {
@@ -183,15 +181,13 @@ package object PictureParser {
       (_, resto) <- char(')') (resto)
     } yield (simplificarEscala(escala(h, v, formaGeometrica)), resto)
 
-    private def simplificarEscala(escalaASimplificar: escala): imprimible = {
-      escalaASimplificar.forma match {
+    private def simplificarEscala(escalaASimplificar: escala): imprimible = escalaASimplificar.forma match {
         case escala(h, v, subForma) => escala(h * escalaASimplificar.h, v * escalaASimplificar.v, subForma)
         case _ => escalaASimplificar match {
             case escala(1.0, 1.0, subforma) => subforma
             case _ => escalaASimplificar
           }
       }
-    }
   }
 
   case class rotacionParser() extends Parser[imprimible] {
@@ -202,8 +198,7 @@ package object PictureParser {
       (_, resto) <- char(')') (resto)
     } yield (simplificarRotacion(rotacion(grados, formaGeometrica)), resto)
 
-    private def simplificarRotacion(rotacionASimplificar: rotacion): imprimible = {
-      rotacionASimplificar.forma match {
+    private def simplificarRotacion(rotacionASimplificar: rotacion): imprimible = rotacionASimplificar.forma match {
         case rotacion(g, subForma) => rotacion(g + rotacionASimplificar.grados, subForma)
         case _ =>
           rotacionASimplificar match {
@@ -211,7 +206,6 @@ package object PictureParser {
             case _ => rotacionASimplificar
           }
       }
-    }
   }
 
   case class traslacionParser() extends Parser[imprimible] {
@@ -222,7 +216,7 @@ package object PictureParser {
       (_, resto) <- char(')') (resto)
     } yield (simplificarTraslacion(traslacion(x, y, formaGeometrica)), resto)
 
-    private def simplificarTraslacion(traslacionASimplificar: traslacion): imprimible = {
+    private def simplificarTraslacion(traslacionASimplificar: traslacion): imprimible =
       traslacionASimplificar.forma match {
         case traslacion(x, y, subForma) => traslacion(x + traslacionASimplificar.x, y + traslacionASimplificar.y, subForma)
         case _ => traslacionASimplificar match {
@@ -230,28 +224,24 @@ package object PictureParser {
             case _ => traslacionASimplificar
           }
       }
-    }
   }
 
-  def variablesEscalaTraslacion(resto: String): Try[((Double, Double), String)] = {
-    (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
-  }
+  def variablesEscalaTraslacion(resto: String): Try[((Double, Double), String)] = (((double() <~ string(", ")) <> double()) <~ string("](")) (resto)
 
   case class PicturePrinter() extends (String => Unit){
-    def apply(formaDescripta: String): Unit = {
-      TADPDrawingAdapter.forScreen( adapter => {
+    def apply(formaDescripta: String): Unit =
+      TADPDrawingAdapter.forScreen( adapter =>
         parserGrafico() (formaDescripta).get match {
           case (formas, _) => formas.print(adapter)
           case _ => println("El parser falla")
         }
-      })
-    }
+      )
   }
 }
 
 object app extends App {
   // grupo anidado
-  PicturePrinter()("grupo(grupo(triangulo[250 @ 150, 150 @ 300, 350 @ 300], triangulo[150 @ 300, 50 @ 450, 250 @ 450]), grupo(rectangulo[460 @ 90, 470 @ 100], rectangulo[450 @ 100, 480 @ 260]))")
+  //PicturePrinter()("grupo(grupo(triangulo[250 @ 150, 150 @ 300, 350 @ 300], triangulo[150 @ 300, 50 @ 450, 250 @ 450]), grupo(rectangulo[460 @ 90, 470 @ 100], rectangulo[450 @ 100, 480 @ 260]))")
 
   // color
   //PicturePrinter()("color[60, 150, 200](grupo(triangulo[200 @ 50, 101 @ 335, 299 @ 335], circulo[200 @ 350, 100]))")

@@ -239,6 +239,7 @@ package object PictureParser {
   }
 }
 
+//Ejemplos de impresión
 object app extends App {
   // grupo anidado
   //PicturePrinter()("grupo(grupo(triangulo[250 @ 150, 150 @ 300, 350 @ 300], triangulo[150 @ 300, 50 @ 450, 250 @ 450]), grupo(rectangulo[460 @ 90, 470 @ 100], rectangulo[450 @ 100, 480 @ 260]))")

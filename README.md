@@ -1,3 +1,5 @@
 # TADP
 
-Este repositorio tiene la estructura básica para arrancar a _darle átomos_ a la materia! :rocket:
+TP de Técnicas Avanzadas de Programación de UTN FRBA.
+Consiste en una primera parte de metaprogramación con Ruby y otra de programación en Objeto-Funcional con Scala.
+Aprobado en noviembre 2020.
